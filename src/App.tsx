@@ -12,7 +12,7 @@ const Rooms = lazy(() => import('./pages/main/Rooms'));
 
 function App() {
   const location = useLocation();
-  const hideNavigationBar: string[] = ['/login'];
+  const hideNavigationBar: string[] = ['/', '/login'];
 
   const isAuthenticated: boolean = sessionStorage.getItem('isAuthenticated') === 'true';
 
@@ -22,6 +22,7 @@ function App() {
 
       <Suspense fallback={<div className='flex justify-center items-center w-screen h-screen'>Loading...</div>}>
         <Routes>
+          <Route path='/' element={isAuthenticated? <Navigate to={'/dashboard'}/> : <Login />} />
           <Route path='/login' element={isAuthenticated? <Navigate to={'/dashboard'}/> : <Login />} />
 
           <Route element={<ProtectedRoutes />}>
@@ -31,7 +32,7 @@ function App() {
             <Route path='/rooms' element={<Rooms />}/>
           </Route>
 
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
     </main>
