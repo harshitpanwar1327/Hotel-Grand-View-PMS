@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { ClipLoader } from "react-spinners"
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/Firebase";
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../../firebase/Firebase"
 
 interface LoginInputs {
   email: string,
@@ -21,12 +21,15 @@ const Login = () => {
     try {
       setLoading(true);
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      sessionStorage.setItem('userId', userCredential.user.uid);
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem("userEmail", userCredential.user.email);
+      navigate('/dashboard');
       toast.success("Logged in successfully");
-      console.log("User Info:", userCredential.user);
-      navigate("/dashboard");
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      console.log(error);
       if (error.code === "auth/invalid-credential") {
         toast.error("Invalid email or password");
       } else {
