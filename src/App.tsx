@@ -17,7 +17,7 @@ function App() {
   const isAuthenticated: boolean = sessionStorage.getItem('isAuthenticated') === 'true';
 
   return (
-    <main id='main-content'>
+    <main id='main-content' className='flex'>
       {!hideNavigationBar.includes(location.pathname) && <Navigation />}
 
       <Suspense fallback={<div className='flex justify-center items-center w-screen h-screen'>Loading...</div>}>
