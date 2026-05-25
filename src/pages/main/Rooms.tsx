@@ -1,104 +1,155 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import AddRoom from "../../modals/AddRoom";
+import { deleteRoom, getRooms, updateRoom, type RoomData } from "../../firebase/services/RoomService";
+import Swal from "sweetalert2";
+import { ClipLoader } from "react-spinners";
+import EditRoom from "../../modals/EditRoom";
 
-const roomStatus = ["All", "Available", "Occupied", "Maintenance"];
+const tabStatus = ["All", "Available", "Occupied", "Maintenance"];
+const roomStatus = ["Available", "Occupied", "Maintenance"];
 
 const Rooms = () => {
+  const [rooms, setRooms] = useState<RoomData[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [activeTab, setActiveTab] = useState<string>("All");
+
+  const [openAddRoomModal, setOpenAddRoomModal] = useState<boolean>(false);
+  const [openEditRoomModal, setOpenEditRoomModal] = useState<boolean>(false);
+
+  const [selectedRoom, setSelectedRoom] = useState<RoomData>({
+    roomNumber: '',
+    roomType: '',
+    pricePerNight: 0,
+    status: ''
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Available":
-        return "bg-green-500";
-
+        return "bg-green-600";
       case "Occupied":
-        return "bg-red-500";
-
+        return "bg-red-600";
       case "Maintenance":
         return "bg-yellow-400";
-
       default:
         return "bg-gray-400";
     }
   };
 
-  const [rooms, setRooms] = useState([
-    {
-      room: "001",
-      type: "Standard",
-      price: "₹1,800",
-      status: roomStatus[1],
-    },
-    {
-      room: "002",
-      type: "Standard",
-      price: "₹1,800",
-      status: roomStatus[1],
-    },
-    {
-      room: "003",
-      type: "Deluxe",
-      price: "₹2,800",
-      status: roomStatus[0],
-    },
-    {
-      room: "101",
-      type: "Deluxe",
-      price: "₹2,800",
-      status: roomStatus[0],
-    },
-    {
-      room: "202",
-      type: "Suite",
-      price: "₹4,500",
-      status: roomStatus[0],
-    },
-    {
-      room: "203",
-      type: "Suite",
-      price: "₹4,500",
-      status: roomStatus[2],
-    },
-    {
-      room: "204",
-      type: "Suite",
-      price: "₹4,500",
-      status: roomStatus[2],
-    },
-    {
-      room: "205",
-      type: "Suite",
-      price: "₹4,500",
-      status: roomStatus[2],
-    },
-    {
-      room: "206",
-      type: "Suite",
-      price: "₹4,500",
-      status: roomStatus[2],
-    },
-  ]);
-  
-  const [activeTab, setActiveTab] = useState("All");
-
-  const filteredRooms =
-    activeTab === "All"
-      ? rooms
-      : rooms.filter((room) => room.status === activeTab);
-
-  const handleStatusChange = (roomNumber: string, newStatus: string) => {
-    setRooms((prevRooms) =>
-      prevRooms.map((room) =>
-        room.room === roomNumber
-          ? { ...room, status: newStatus }
-          : room
-      )
-    );
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await getRooms();
+      setRooms(response as RoomData[]);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch rooms!");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const [openAddRoomModal, setOpenAddRoomModal] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchRooms();
+  }, []);
+
+  const filteredRooms = activeTab === "All" ? rooms : rooms.filter((room) => room.status === activeTab);
+
+  const handleStatusChange = async (roomId: string, newStatus: string) => {
+    try {
+      await updateRoom(roomId, {
+        status: newStatus,
+      });
+
+      fetchRooms();
+
+      toast.success("Room status updated.");
+
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update room!");
+    }
+  };
+
+  const handleEditRoom = async (room: RoomData) => {
+    setSelectedRoom(room);
+    setOpenEditRoomModal(true);
+  }
+
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      const result = await Swal.fire({
+        title: "Delete Room?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Delete",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl",
+          confirmButton: "rounded-xl px-5 py-2",
+          cancelButton: "rounded-xl px-5 py-2",
+        },
+      });
+
+      if (!result.isConfirmed) return;
+
+      Swal.fire({
+        title: "Deleting Room...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl",
+        },
+      });
+
+      await deleteRoom(roomId);
+
+      fetchRooms();
+
+      Swal.fire({
+        title: "Deleted!",
+        text: "Room deleted successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl",
+        },
+      });
+
+    } catch (error) {
+      console.log(error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to delete room.",
+        icon: "error",
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl",
+        },
+      });
+    }
+  };
 
   return (
-    <div className="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
+    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
       <div className="flex items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold">Rooms</h1>
@@ -108,54 +159,65 @@ const Rooms = () => {
         <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
       </div>
 
-      <div className="flex gap-2">
-        {roomStatus.map((status, index) => (
+      <div className="flex flex-wrap gap-2">
+        {tabStatus.map((status, index) => (
           <button key={index} onClick={()=>setActiveTab(status)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${activeTab === status ? "bg-[#1B2A41] text-white border-[#1B2A41]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
             {status}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {filteredRooms.map((room) => (
-          <div key={room.room} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <div className="flex items-start justify-between mb-2">
+      {loading ? (
+        <div className="flex grow items-center justify-center">
+          <ClipLoader color="#1B2A41" size={50} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
+          {filteredRooms.map((room) => (
+            <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-gray-500 text-xs font-medium">Room Number</p>
+                  <h2 className="text-2xl font-bold">{room.roomNumber}</h2>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(room.status)}`} />
+                  <span className="text-gray-500 text-sm">{room.status}</span>
+                </div>
+              </div>
+
               <div>
-                <p className="text-gray-500 text-sm">ROOM</p>
-                <h2 className="text-2xl font-bold text-slate-900 mt-1">{room.room}</h2>
+                <p className="text-gray-500 text-xs font-medium">Room Type</p>
+                <p className="font-medium text-lg">{room.roomType}</p>
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <div className={`w-3 h-3 rounded-full ${getStatusColor(room.status)}`} />
-                <span className="text-gray-500 text-sm">{room.status}</span>
+
+              <div>
+                <p className="text-gray-500 text-xs font-medium">Price per day</p>
+                <p className="font-medium text-lg">₹ {room.pricePerNight.toLocaleString('en-IN')} <span className="text-xs">/day</span></p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select value={room.status} onChange={(e)=>handleStatusChange(room.roomId, e.target.value)} className="flex-1 rounded-xl border border-gray-200 px-4 py-2 shadow-sm outline-none bg-white">
+                  {roomStatus.map((status, index) => (
+                    <option key={index} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+                <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-blue-50 transition duration-300" onClick={()=>handleEditRoom(room)}>
+                  <Pencil size={16} className="text-blue-500" />
+                </button>
+                <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-red-50 transition duration-300" onClick={()=>handleDeleteRoom(room.roomId)}>
+                  <Trash2 size={16} className="text-red-500" />
+                </button>
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            <p className="text-gray-500 text-md mb-2">{room.type}</p>
-
-            <div className="mb-6">
-              <span className="text-xl font-bold text-slate-900">{room.price}</span>
-              <span className="text-gray-500">/day</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <select value={room.status} onChange={(e) =>handleStatusChange(room.room, e.target.value)} className="flex-1 h-12 rounded-xl border border-gray-200 px-4 text-base shadow-sm outline-none bg-white">
-                {roomStatus.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <button className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-gray-50 transition">
-                <Pencil size={16} className="text-slate-700" />
-              </button>
-              <button className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-red-50 transition">
-                <Trash2 size={16} className="text-red-500" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} />}
+      {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} fetchRooms={fetchRooms} />}
+      {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} fetchRooms={fetchRooms} />}
     </div>
   )
 }

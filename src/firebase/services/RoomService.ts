@@ -13,7 +13,6 @@ const roomsRef = collection(db, "rooms");
 
 export const addRoom = async (data: RoomData) => {
   try {
-    // Check if room already exists
     const roomQuery = query(
       roomsRef,
       where("roomNumber", "==", data.roomNumber)
@@ -25,7 +24,6 @@ export const addRoom = async (data: RoomData) => {
       throw new Error("Room number already exists!");
     }
 
-    // Create Room
     const roomRef = await addDoc(roomsRef, {
       roomNumber: data.roomNumber,
       roomType: data.roomType,
@@ -35,7 +33,6 @@ export const addRoom = async (data: RoomData) => {
       updatedAt: serverTimestamp(),
     });
 
-    // Store Firebase doc ID inside document
     await updateDoc(doc(db, "rooms", roomRef.id), {
       roomId: roomRef.id,
     });
@@ -52,7 +49,7 @@ export const getRooms = async () => {
   try {
     const roomQuery = query(
       roomsRef,
-      orderBy("createdAt", "desc")
+      orderBy("roomNumber", "asc")
     );
 
     const snapshot = await getDocs(roomQuery);
@@ -71,25 +68,6 @@ export const getRooms = async () => {
 
 export const updateRoom = async (roomId: string, updatedData: Partial<RoomData>) => {
   try {
-    // Check duplicate room number
-    if (updatedData.roomNumber) {
-
-      const roomQuery = query(
-        roomsRef,
-        where("roomNumber", "==", updatedData.roomNumber)
-      );
-
-      const snapshot = await getDocs(roomQuery);
-
-      const existingRoom = snapshot.docs.find(
-        doc => doc.id !== roomId
-      );
-
-      if (existingRoom) {
-        throw new Error("Room number already exists!");
-      }
-    }
-
     const roomDoc = doc(db, "rooms", roomId);
 
     await updateDoc(roomDoc, {
