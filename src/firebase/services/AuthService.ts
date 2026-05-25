@@ -3,6 +3,7 @@ import { auth, db } from "../Firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export const loginUser = async (email: string, password: string) => {
+  try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
     const firebaseUser = userCredential.user;
@@ -17,9 +18,10 @@ export const loginUser = async (email: string, password: string) => {
 
     const userData = userSnap.data();
 
-    return {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        role: userData.role
-    }
+    return { uid: firebaseUser.uid, email: firebaseUser.email, role: userData.role }
+    
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
