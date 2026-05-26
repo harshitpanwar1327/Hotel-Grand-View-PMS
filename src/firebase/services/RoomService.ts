@@ -2,10 +2,10 @@ import { addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, 
 import { db } from "../Firebase";
 
 export interface RoomData {
+  pricePerNight: number;
   roomId?: string;
   roomNumber: string;
   roomType: string;
-  pricePerNight: number;
   status: string;
 }
 
