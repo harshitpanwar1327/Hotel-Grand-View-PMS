@@ -21,6 +21,7 @@ const Rooms = () => {
   const [openEditRoomModal, setOpenEditRoomModal] = useState<boolean>(false);
 
   const [selectedRoom, setSelectedRoom] = useState<RoomData>({
+    roomId: '',
     roomNumber: '',
     roomType: '',
     pricePerNight: 0,
