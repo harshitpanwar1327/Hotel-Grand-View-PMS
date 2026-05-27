@@ -1,14 +1,15 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { addBooking } from "../../firebase/services/BookingService";
 import { getRooms, type RoomData } from "../../firebase/services/RoomService";
+import { Timestamp } from "firebase/firestore";
 
 interface CheckInFormData {
   identityNumber: string;
-  checkInDate: string;
-  checkOutDate: string;
+  checkInAt: Date;
+  checkOutAt: Date;
   guestName: string;
   numberOfGuests: number;
   paidAmount: number;
@@ -19,34 +20,91 @@ interface CheckInFormData {
 
 const CheckIn = () => {
   const [loading, setLoading] = useState<boolean>(false);
+
   const [rooms, setRooms] = useState<RoomData[]>([]);
 
   const filteredRooms = rooms.filter((room) => room.status === "Available");
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CheckInFormData>({});
+  const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<CheckInFormData>({});
+
+  const selectedRoomId = useWatch({
+    control,
+    name: "roomId",
+  });
+
+  const selectedCheckout = useWatch({
+    control,
+    name: "checkOutAt",
+  });
 
   const fetchRooms = async () => {
-      try {
-        setLoading(true);
-        const response = await getRooms();
-        setRooms(response as RoomData[]);
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to fetch rooms!");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchRooms();
-    }, []);
+    try {
+      const response = await getRooms();
+      setRooms(response as RoomData[]);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch rooms!");
+    }
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    if (rooms.length > 0) {
+      const availableRoom = rooms.find((room) => room.status === "Available");
+      if (availableRoom) setValue("roomId", availableRoom.roomId);
+    }
+  }, [rooms, setValue]);
+
+  const now = new Date();
+  const minCheckout = new Date();
+
+  if (now.getHours() >= 11) {
+    minCheckout.setDate(minCheckout.getDate() + 1);
+  }
+
+  const minCheckoutDate = minCheckout.toISOString().split("T")[0];
+
+  const selectedRoom = rooms.find((room) => room.roomId === selectedRoomId);
+  const pricePerDay = selectedRoom?.pricePerNight || 0;
+
+  const checkInDate = new Date();
+  const checkoutDate = selectedCheckout ? new Date(selectedCheckout) : null;
+
+  let totalDays = 0;
+
+  if (checkoutDate) {
+    checkoutDate.setHours(11, 0, 0, 0);
+    const diffTime = checkoutDate.getTime() - checkInDate.getTime();
+
+    totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (totalDays < 1) {
+      totalDays = 1;
+    }
+  }
+
+  const stayTotal = totalDays * pricePerDay;
 
   const onSubmit = async (data: CheckInFormData) => {
     try {
       setLoading(true);
-      await addBooking(data);
+
+      const checkInAt = new Date();
+      const checkOutAt = new Date(data.checkOutAt);
+      checkOutAt.setHours(11, 0, 0, 0);
+
+      const bookingData = {
+        ...data,
+        checkInAt: Timestamp.fromDate(checkInAt),
+        checkOutAt: Timestamp.fromDate(checkOutAt),
+        totalAmount: stayTotal
+      };
+
+      await addBooking(bookingData);
       toast.success("Booking confirmed successfully.");
       reset();
       setLoading(false);
@@ -135,8 +193,9 @@ const CheckIn = () => {
             <select id="roomId" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300"
               {...register("roomId", {
                 required: "Room is required"
-              })} 
+              })}
             >
+              <option value="" disabled>Select</option>
               {filteredRooms.map((room)=>(
                 <option key={room.roomId} value={room.roomId}>#{room.roomNumber} • {room.roomType}</option>
               ))}
@@ -145,23 +204,18 @@ const CheckIn = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="checkInDate" className="text-xs font-semibold">Check-In Date <span className="text-red-500">*</span></label>
-            <input type="date" id="checkInDate" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300"
-              {...register("checkInDate", { 
-                required: "Check-in date is required"
-              })} 
-            />
-            {errors.checkInDate && <p className="text-red-500 text-xs">{errors.checkInDate.message}</p>}
+            <label className="text-xs font-semibold">Check-In Date & Time</label>
+            <input type="text" disabled value={new Date().toLocaleString()} className="w-full p-2 bg-gray-100 border border-gray-200 rounded-xl" />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="checkOutDate" className="text-xs font-semibold">Check-Out Date <span className="text-red-500">*</span></label>
-            <input type="date" id="checkOutDate" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300"
-              {...register("checkOutDate", { 
+            <label htmlFor="checkOutAt" className="text-xs font-semibold">Check-Out Date <span className="text-red-500">*</span></label>
+            <input type="date" min={minCheckoutDate} id="checkOutAt" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300"
+              {...register("checkOutAt", { 
                 required: "Check-out date is required"
               })} 
             />
-            {errors.checkOutDate && <p className="text-red-500 text-xs">{errors.checkOutDate.message}</p>}
+            {errors.checkOutAt && <p className="text-red-500 text-xs">{errors.checkOutAt.message}</p>}
           </div>
 
           <div className="flex flex-col gap-1">
@@ -190,6 +244,8 @@ const CheckIn = () => {
 
           <div className="bg-gray-200 rounded-xl p-4 flex flex-col gap-1">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Stay Total</p>
+            <h3 className="text-2xl font-semibold">₹ {stayTotal.toLocaleString('en-IN')}</h3>
+            <p className="text-xs text-gray-500">1 day • ₹{pricePerDay.toLocaleString('en-IN')}/day</p>
           </div>
         </div>
 

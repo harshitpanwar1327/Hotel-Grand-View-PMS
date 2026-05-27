@@ -1,5 +1,5 @@
 import { X } from "lucide-react"
-import { type BookingData } from "../firebase/services/BookingService";
+import { type BookingData } from "../../firebase/services/BookingService";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";

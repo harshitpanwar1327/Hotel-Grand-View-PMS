@@ -1,81 +1,99 @@
-import { Search, FileText, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
-import Checkout from "../../modals/Checkout";
+import { useCallback, useEffect, useState } from "react";
+// import Checkout from "../../modals/bookings/Checkout";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { getBookings, type BookingData } from "../../firebase/services/BookingService";
+// import { Timestamp } from "firebase/firestore";
 
-const tabStatus = ["All", "Active", "Checked Out"];
+const statusFilter = ["All", "Active", "Checked Out"];
 
 const Bookings = () => {
   const [bookings, setBookings] = useState<BookingData[]>([]);
 
-  const [activeTab, setActiveTab] = useState<string>("All");
+  const [status, setStatus] = useState<string>("All");
+  const [date, setDate] = useState<string>("");
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  // const [search, setSearch] = useState<string>("");
+
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
+  // const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
 
-  const [selectedBooking, setSelectedBooking] = useState<BookingData>({
-    identityNumber: "",
-    bookingId: undefined,
-    bookingStatus: "",
-    checkInDate: "",
-    checkOutDate: "",
-    createdBy: "",
-    guestName: "",
-    numberOfGuests: 0,
-    paidAmount: 0,
-    paymentMethod: "",
-    paymentStatus: "",
-    pendingAmount: 0,
-    phone: "",
-    roomId: "",
-    totalAmount: 0,
-  });
+  // const [selectedBooking, setSelectedBooking] = useState<BookingData>({
+  //   identityNumber: "",
+  //   bookingId: undefined,
+  //   bookingStatus: "",
+  //   checkInAt: Timestamp.now(), 
+  //   checkOutAt: Timestamp.now(), 
+  //   createdBy: "",
+  //   guestName: "",
+  //   numberOfGuests: 0,
+  //   paidAmount: 0,
+  //   paymentMethod: "",
+  //   paymentStatus: "",
+  //   pendingAmount: 0,
+  //   phone: "",
+  //   roomId: "",
+  //   totalAmount: 0,
+  // });
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       setLoading(true);
+
       const response = await getBookings();
+
       setBookings(response as BookingData[]);
+
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch bookings!");
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchBookings();
   }, []);
 
-  const filteredBookings = activeTab === "All" ? bookings : bookings.filter((booking) => booking.bookingStatus === activeTab);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchBookings();
+    }, 500);
 
-  const handleCheckout = (booking: BookingData) => {
-    setSelectedBooking(booking);
-    setOpenCheckoutModal(true);
-  }
+    return () => clearTimeout(timer);
+  }, [fetchBookings]);
+
+  // const filteredBookings = activeTab === "All" ? bookings : bookings.filter((booking) => booking.bookingStatus === activeTab);
+
+  // const handleCheckout = (booking: BookingData) => {
+  //   setSelectedBooking(booking);
+  //   setOpenCheckoutModal(true);
+  // }
 
   return (
-    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
+    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6 overflow-auto">
       <div className="flex items-center justify-between gap-6">
-        <div className="text-3xl font-bold">Bookings</div>
-        <div className="flex items-center gap-2 w- px-3 p-2 border border-gray-300 rounded-2xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300">
+        <h1 className="text-3xl font-bold">Bookings</h1>
+        {/* <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300">
           <Search className="w-4 h-4 text-gray-500" />
-          <input type="text" placeholder="Search guest, room..." className="bg-transparent outline-none text-md text-gray-700 w-full" value={searchQuery} onChange={(e)=>setSearchQuery(e.target.value)}/>
-        </div>
+          <input type="text" placeholder="Search guest, room..." className="bg-transparent outline-none text-md w-full" value={search} onChange={(e)=>setSearch(e.target.value)}/>
+        </div> */}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {tabStatus.map((status, index) => (
-          <button key={index} onClick={()=>setActiveTab(status)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${activeTab === status ? "bg-[#1B2A41] text-white border-[#1B2A41]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
-            {status}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="statusFilter" className="text-xs font-semibold">Status:</label>
+          <select name="statusFilter" id="statusFilter" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300">
+            {statusFilter.map((status, index) => (
+              <option key={index} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="dateFilter" className="text-xs font-semibold">Date:</label>
+          <input type="date" name="dateFilter" id="dateFilter" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" />
+        </div>
+
+        <button type="button" className='self-end border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-100 hover:border-gray-500 transition duration-300'>Reset</button>
       </div>
 
       {loading ? (
@@ -83,9 +101,9 @@ const Bookings = () => {
           <ClipLoader color="#1B2A41" size={50} />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="grow rounded-2xl border border-gray-200 shadow-sm overflow-auto">
           <table className="w-full">
-            <thead className="bg-[#f8fafc] border-b border-gray-200">
+            <thead className="bg-gray-100 border-b border-gray-200">
               <tr className="text-left text-gray-500 text-sm">
                 <th className="px-6 py-3 font-semibold">Guest</th>
                 <th className="px-6 py-3 font-semibold">Room</th>
@@ -94,43 +112,49 @@ const Bookings = () => {
                 <th className="px-6 py-3 font-semibold">Total</th>
                 <th className="px-6 py-3 font-semibold">Paid</th>
                 <th className="px-6 py-3 font-semibold">Status</th>
-                <th className="px-6 py-3"></th>
-                <th className="px-6 py-3"></th>
+                {/* <th className="px-6 py-3"></th>
+                <th className="px-6 py-3"></th> */}
               </tr>
             </thead>
             <tbody>
-              {filteredBookings.map((booking) => (
-                <tr key={booking.identityNumber} className="border-b border-gray-200 hover:bg-gray-50 transition text-sm">
+              {bookings.map((booking) => (
+                <tr key={booking.identityNumber} className="border-b border-gray-200 hover:bg-gray-100 transition text-sm">
                   <td className="px-6 py-3">
-                    <div>
-                      <h2 className="font-semibold">{booking.guestName}</h2>
-                      <p className="text-gray-500">{booking.phone}</p>
-                    </div>
+                    <h2 className="font-semibold">{booking.guestName}</h2>
+                    <p className="text-gray-500">{booking.phone}</p>
                   </td>
                   <td className="px-6 py-3 font-semibold">{booking.roomId}</td>
-                  <td className="px-6 py-3">{booking.checkInDate?.toDate().toLocaleDateString()}</td>
-                  <td className="px-6 py-3">{booking.checkOutDate?.toDate().toLocaleDateString()}</td>
-                  <td className="px-6 py-3 font-semibold">{booking.totalAmount?.toLocaleString()}</td>
+                  <td className="px-6 py-3">{booking.checkInAt?.toDate().toLocaleDateString("en-IN")}</td>
+                  <td className="px-6 py-3">{booking.checkOutAt?.toDate().toLocaleDateString("en-IN")}</td>
+                  <td className="px-6 py-3 font-semibold">₹{booking.totalAmount?.toLocaleString('en-IN')}</td>
                   <td className="px-6 py-3">
-                    <h2 className="font-semibold">{booking.paidAmount?.toLocaleString()}</h2>
-                    <p className="text-[#5b4720]">due ₹{booking.pendingAmount?.toLocaleString()}</p>
+                    <h2 className="font-semibold">₹{booking.paidAmount?.toLocaleString('en-IN')}</h2>
+                    <p className="text-xs">due ₹{booking.pendingAmount?.toLocaleString('en-IN')}</p>
                   </td>
-                  <td className="py-3">
-                    <span className="px-3 py-1 rounded-full bg-[#f7ebc8] text-[#5b4720] font-medium">Active · Partial</span>
+                  <td className="px-6 py-3">
+                    <div className="flex flex-col gap-1">
+                      <span className={`flex items-center justify-center px-3 py-1 rounded-full font-medium ${booking.bookingStatus==='Active' ? 'bg-green-600/10 text-green-600' : 'bg-red-600/10 text-red-600'}`}>{booking.bookingStatus || '-'}</span>
+                      <span className={`flex items-center justify-center px-3 py-1 rounded-full font-medium ${booking.paymentStatus==='Paid' ? 'bg-green-600/10 text-green-600' : 'bg-[#f7ebc8] text-[#5b4720]'}`}>{booking.paymentStatus || '-'}</span>
+                    </div>
+                  </td>
+                  {/* <td className="px-4 py-3">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300">
+                      <FileText className="w-4 h-4 text-gray-500" /> Invoice
+                    </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button className="flex items-center gap-1 px-4 py-2 rounded-xl border border-gray-200 shadow-sm bg-white hover:bg-gray-50 transition font-semibold"><FileText className="w-4 h-4 text-gray-500" /><span>Invoice</span></button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button className="flex items-center gap-1 px-4 py-2 rounded-xl bg-[#0f2747] text-white shadow-sm hover:opacity-90 transition font-semibold" onClick={()=>handleCheckout(booking)}><LogOut className="w-4 h-4 text-white" /><span>Checkout</span></button>
-                  </td>
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1B2A41] text-white shadow-sm font-semibold hover:opacity-90 transition duration-300" onClick={()=>handleCheckout(booking)}>
+                      <LogOut className="w-4 h-4 text-white" /> Checkout
+                    </button>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />}
+
+      {/* {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />} */}
     </div>
   )
 }

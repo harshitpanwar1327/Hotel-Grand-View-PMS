@@ -3,22 +3,25 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react"
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { addRoom, type RoomData } from "../firebase/services/RoomService";
+import { updateRoom, type RoomData } from "../../firebase/services/RoomService";
 
-interface AddRoomProps {
+interface EditRoomProps {
   setOpenModal: (open: boolean) => void;
+  selectedRoom: RoomData;
   fetchRooms: () => void;
 }
 
-const AddRoom: React.FC<AddRoomProps> = ({ setOpenModal, fetchRooms }) => {
+const EditRoom: React.FC<EditRoomProps> = ({ setOpenModal, selectedRoom, fetchRooms }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<RoomData>({});
+  const { register, handleSubmit, formState: { errors } } = useForm<RoomData>({
+    defaultValues: selectedRoom
+  });
 
   const onsubmit = async (data: RoomData) => {
     try {
       setLoading(true);
-      await addRoom(data);
-      toast.success("Room added successfully.");
+      await updateRoom(data.roomId, data);
+      toast.success("Room updated successfully.");
       fetchRooms();
       setLoading(false);
       setOpenModal(false);
@@ -33,7 +36,7 @@ const AddRoom: React.FC<AddRoomProps> = ({ setOpenModal, fetchRooms }) => {
     <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-8 bg-black/70 z-60' onClick={()=>setOpenModal(false)}>
       <form onSubmit={handleSubmit(onsubmit)} onClick={(e)=>e.stopPropagation()} className="bg-white w-full md:w-2/3 lg:w-1/2 rounded-xl flex flex-col gap-4 p-6">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold">Add New Room</h2>
+          <h2 className="text-lg font-semibold">Edit Room</h2>
           <X size={18} className="cursor-pointer text-gray-500 hover:text-black hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>
         </div>
 
@@ -91,11 +94,11 @@ const AddRoom: React.FC<AddRoomProps> = ({ setOpenModal, fetchRooms }) => {
 
         <div className='flex justify-end gap-3 text-sm'>
           <button type="button" className='border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 hover:shadow-lg transition duration-300' onClick={()=>setOpenModal(false)}>Cancel</button>
-          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300'>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Add Room"}</button>
+          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300'>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Edit Room"}</button>
         </div>
       </form>
     </div>
   )
 }
 
-export default AddRoom
+export default EditRoom

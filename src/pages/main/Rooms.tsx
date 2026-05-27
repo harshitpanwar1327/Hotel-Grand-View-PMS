@@ -1,11 +1,11 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import AddRoom from "../../modals/AddRoom";
 import { deleteRoom, getRooms, updateRoom, type RoomData } from "../../firebase/services/RoomService";
 import Swal from "sweetalert2";
 import { ClipLoader } from "react-spinners";
-import EditRoom from "../../modals/EditRoom";
+import AddRoom from "../../modals/checkin/AddRoom";
+import EditRoom from "../../modals/checkin/EditRoom";
 
 const tabStatus = ["All", "Available", "Occupied", "Maintenance"];
 const roomStatus = ["Available", "Occupied", "Maintenance"];
@@ -154,7 +154,7 @@ const Rooms = () => {
       <div className="flex items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold">Rooms</h1>
-          <p className="text-gray-500 text-sm">{rooms.length} rooms</p>
+          <p className="text-gray-500 text-sm">{filteredRooms.length} of {rooms.length} rooms</p>
         </div>
 
         <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
