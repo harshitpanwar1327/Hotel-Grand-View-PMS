@@ -16,6 +16,7 @@ export interface BookingData {
   pendingAmount: number;
   phone: string;
   roomId: string;
+  roomNumber: string;
   totalAmount: number;
 }
 
@@ -43,6 +44,7 @@ export const addBooking = async (data: Partial<BookingData>) => {
       pendingAmount: data.totalAmount - data.paidAmount,
       phone: data.phone,
       roomId: data.roomId,
+      roomNumber: data.roomNumber,
       totalAmount: data.totalAmount,
       createdAt: serverTimestamp()
     });
@@ -65,14 +67,14 @@ export const addBooking = async (data: Partial<BookingData>) => {
 
 export const getBookings = async (filters?: FilterOptions) => {
   try {
-    const bookingQuery = query(bookingsRef, orderBy("createdAt", "desc"));
-
     const constraints: QueryConstraint[] = [
       orderBy("createdAt", "desc")
     ];
 
     if (filters?.status && filters.status !== "All") {
-      constraints.push(where("bookingStatus", "==", filters.status));
+      constraints.push(
+        where("bookingStatus", "==", filters.status)
+      );
     }
 
     if (filters?.date) {
@@ -84,12 +86,14 @@ export const getBookings = async (filters?: FilterOptions) => {
 
       const startTimestamp = Timestamp.fromDate(startOfDay);
       const endTimestamp = Timestamp.fromDate(endOfDay);
-      
+
       constraints.push(
-        where("checkInAt", ">=", startTimestamp),
-        where("checkInAt", "<=", endTimestamp)
+        where("checkInAt", "<=", endTimestamp),
+        where("checkOutAt", ">=", startTimestamp)
       );
     }
+
+    const bookingQuery = query(bookingsRef, ...constraints);
 
     const snapshot = await getDocs(bookingQuery);
 

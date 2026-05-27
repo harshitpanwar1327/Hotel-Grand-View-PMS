@@ -73,9 +73,11 @@ const Navigation = () => {
         </div>
 
         <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-          <NavLink to="/dashboard" className={navClass}>
-            <LayoutDashboard size={18} /> Dashboard
-          </NavLink>
+          {role==="admin" &&
+            <NavLink to="/dashboard" className={navClass}>
+              <LayoutDashboard size={18} /> Dashboard
+            </NavLink>
+          }
           <NavLink to="/check-in" className={navClass}>
             <UserPlus size={18} /> Check In
           </NavLink>
@@ -146,9 +148,11 @@ const Navigation = () => {
               </div>
 
               <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-                <NavLink to="/dashboard" className={navClass}>
-                  <LayoutDashboard size={18} /> Dashboard
-                </NavLink>
+                {role==="admin" &&
+                  <NavLink to="/dashboard" className={navClass}>
+                    <LayoutDashboard size={18} /> Dashboard
+                  </NavLink>
+                }
                 <NavLink to="/check-in" className={navClass}>
                   <UserPlus size={18} /> Check In
                 </NavLink>

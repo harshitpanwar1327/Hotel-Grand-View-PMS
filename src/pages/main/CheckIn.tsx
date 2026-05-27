@@ -1,5 +1,5 @@
 import { useForm, useWatch } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { addBooking } from "../../firebase/services/BookingService";
@@ -38,20 +38,26 @@ const CheckIn = () => {
     name: "checkOutAt",
   });
 
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await getRooms();
       setRooms(response as RoomData[]);
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch rooms!");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRooms();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchRooms();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [fetchRooms]);
 
   useEffect(() => {
     if (rooms.length > 0) {
@@ -100,6 +106,7 @@ const CheckIn = () => {
 
       const bookingData = {
         ...data,
+        roomNumber: selectedRoom?.roomNumber,
         checkInAt: Timestamp.fromDate(checkInAt),
         checkOutAt: Timestamp.fromDate(checkOutAt),
         totalAmount: stayTotal
@@ -183,7 +190,8 @@ const CheckIn = () => {
           <div className="flex flex-col gap-1">
             <label htmlFor="numberOfGuests" className="text-xs font-semibold">Total Guests <span className="text-red-500">*</span></label>
             <input type="number" id="numberOfGuests" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter total guests"
-              {...register("numberOfGuests", { 
+              {...register("numberOfGuests", {
+                valueAsNumber: true,
                 required: "Total guests is required",
                 min: { 
                   value: 1, 
@@ -228,7 +236,8 @@ const CheckIn = () => {
           <div className="flex flex-col gap-1">
             <label htmlFor="paidAmount" className="text-xs font-semibold">Payment Amount (₹) <span className="text-red-500">*</span></label>
             <input type="number" id="paidAmount" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" min={0} placeholder="Advance payment"
-              {...register("paidAmount", { 
+              {...register("paidAmount", {
+                valueAsNumber: true,
                 required: "Amount is required"
               })} 
             />
@@ -258,7 +267,7 @@ const CheckIn = () => {
 
         <div className='flex justify-end gap-3 text-sm'>
           <button type="button" className='border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 hover:shadow-lg transition duration-300' onClick={()=>reset()}>Reset Form</button>
-          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300'>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Confirm Booking"}</button>
+          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300 disabled:cursor-not-allowed!' disabled={loading}>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Confirm Booking"}</button>
         </div>
       </form>
     </div>

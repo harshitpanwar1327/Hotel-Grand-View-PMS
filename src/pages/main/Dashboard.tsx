@@ -1,55 +1,57 @@
-import { BedDouble, BedSingle, IndianRupee, KeyRound } from "lucide-react";
+// import { BedDouble, BedSingle, IndianRupee, KeyRound } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
-  const cards = [
-    {
-      title: "TOTAL ROOMS",
-      value: 6,
-      icon: <KeyRound size={15}/>,
-      bg: "bg-[#EEF2FF]",
-      iconColor: "text-[#1B2A41]",
-    },
-    {
-      title: "OCCUPIED",
-      value: 2,
-      icon: <BedSingle size={15} />,
-      bg: "bg-[#FEE2E2]",
-      iconColor: "text-red-500",
-    },
-    {
-      title: "AVAILABLE",
-      value: 3,
-      icon: <BedDouble size={15} />,
-      bg: "bg-[#DCFCE7]",
-      iconColor: "text-green-600",
-    },
-    {
-      title: "TODAY REVENUE",
-      value: "₹0",
-      icon: <IndianRupee size={15} />,
-      bg: "bg-[#F3F4F6]",
-      iconColor: "text-black",
-    },
-  ];
+  // const cards = [
+  //   {
+  //     title: "TOTAL ROOMS",
+  //     value: 6,
+  //     icon: <KeyRound size={15}/>,
+  //     bg: "bg-[#EEF2FF]",
+  //     iconColor: "text-[#1B2A41]",
+  //   },
+  //   {
+  //     title: "OCCUPIED",
+  //     value: 2,
+  //     icon: <BedSingle size={15} />,
+  //     bg: "bg-[#FEE2E2]",
+  //     iconColor: "text-red-500",
+  //   },
+  //   {
+  //     title: "AVAILABLE",
+  //     value: 3,
+  //     icon: <BedDouble size={15} />,
+  //     bg: "bg-[#DCFCE7]",
+  //     iconColor: "text-green-600",
+  //   },
+  //   {
+  //     title: "TODAY REVENUE",
+  //     value: "₹0",
+  //     icon: <IndianRupee size={15} />,
+  //     bg: "bg-[#F3F4F6]",
+  //     iconColor: "text-black",
+  //   },
+  // ];
 
   return (
     <>
-      <div className="flex-1 h-screen overflow-y-auto">
-        <div className="relative flex flex-col gap-6 p-6 min-h-full w-full">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-[#111827]">Dashboard</h1>
-              <p className="text-gray-500 mt-1 text-base">
-                {new Date().toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-            </div>
-            <button className="bg-[#0F2D4A] hover:bg-[#0c243b] text-white px-6 py-3 rounded-2xl shadow-sm text-base transition-all">+ New Check-in</button>
+      <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
+        <div className="flex items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-gray-500 text-sm">
+              {new Date().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+              })}
+            </p>
           </div>
 
+          <NavLink to={'/check-in'} className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300">+ New Check-in</NavLink>
+        </div>
+
+        {/* <div className="relative flex flex-col gap-6 p-6 min-h-full w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {cards.map((card, index) => (
               <div key={index} className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex justify-between items-start">
@@ -115,7 +117,7 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   )
