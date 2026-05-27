@@ -20,7 +20,7 @@ const Bookings = () => {
   // const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
 
   // const [selectedBooking, setSelectedBooking] = useState<BookingData>({
-  //   identityNumber: "",
+  //   aadharNumber: "",
   //   bookingId: undefined,
   //   bookingStatus: "",
   //   checkInAt: Timestamp.now(), 
@@ -118,7 +118,7 @@ const Bookings = () => {
             </thead>
             <tbody>
               {bookings.map((booking) => (
-                <tr key={booking.identityNumber} className="border-b border-gray-200 hover:bg-gray-100 transition text-sm">
+                <tr key={booking.aadharNumber} className="border-b border-gray-200 hover:bg-gray-100 transition text-sm">
                   <td className="px-6 py-3">
                     <h2 className="font-semibold">{booking.guestName}</h2>
                     <p className="text-gray-500">{booking.phone}</p>

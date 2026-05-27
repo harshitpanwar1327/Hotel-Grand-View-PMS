@@ -7,7 +7,7 @@ import { getRooms, type RoomData } from "../../firebase/services/RoomService";
 import { Timestamp } from "firebase/firestore";
 
 interface CheckInFormData {
-  identityNumber: string;
+  aadharNumber: string;
   checkInAt: Date;
   checkOutAt: Date;
   guestName: string;
@@ -153,23 +153,30 @@ const CheckIn = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="identityNumber" className="text-xs font-semibold">Aadhar Number / Passport Number <span className="text-red-500">*</span>
+            <label htmlFor="aadharNumber" className="text-xs font-semibold">Aadhar Number<span className="text-red-500">*</span>
             </label>
-            <input type="text" id="identityNumber" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter Aadhar or Passport number"
-              {...register("identityNumber", {
-                required: "Aadhar or Passport number is required",
+            <input type="text" id="aadharNumber" maxLength={14} className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter Aadhar number"
+              {...register("aadharNumber", {
+                required: "Aadhar number is required",
                 validate: (value) => {
-                  const trimmed = value.trim();
+                  const cleaned = value.replace(/\s/g, "");
                   const aadharRegex = /^\d{12}$/;
-                  const passportRegex = /^[A-Z][0-9]{7}$/i;
-                  if (aadharRegex.test(trimmed) || passportRegex.test(trimmed)) {
+                  if (aadharRegex.test(cleaned)) {
                     return true;
                   }
-                  return "Enter a valid 12-digit Aadhar number or valid Passport number";
+                  return "Enter a valid 12-digit Aadhar number";
+                },
+                onChange: (e) => {
+                  let value = e.target.value.replace(/\D/g, "");
+                  value = value.substring(0, 12);
+                  const formatted = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+                  setValue("aadharNumber", formatted, {
+                    shouldValidate: true,
+                  });
                 },
               })}
             />
-            {errors.identityNumber && (<p className="text-red-500 text-xs">{errors.identityNumber.message}</p>)}
+            {errors.aadharNumber && (<p className="text-red-500 text-xs">{errors.aadharNumber.message}</p>)}
           </div>
 
           <div className="flex flex-col gap-1">

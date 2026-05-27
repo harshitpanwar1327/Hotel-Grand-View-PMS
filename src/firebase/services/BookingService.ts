@@ -2,7 +2,7 @@ import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, Time
 import { db } from "../Firebase";
 
 export interface BookingData {
-  identityNumber: string;
+  aadharNumber: string;
   bookingId: string;
   bookingStatus: string;
   checkInAt: Timestamp;
@@ -30,7 +30,7 @@ const email = sessionStorage.getItem('userEmail');
 export const addBooking = async (data: Partial<BookingData>) => {
   try {
     const bookingRef = await addDoc(bookingsRef, {
-      identityNumber: data.identityNumber,
+      aadharNumber: data.aadharNumber,
       bookingStatus: 'Active',
       checkInAt: data.checkInAt,
       checkOutAt: data.checkOutAt,

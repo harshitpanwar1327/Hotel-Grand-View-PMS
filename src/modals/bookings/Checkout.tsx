@@ -19,7 +19,7 @@ const Checkout: React.FC<CheckoutProps> = ({ setOpenModal, selectedBooking, fetc
     const onSubmit = async (data: BookingData) => {
         try {
           setLoading(true);
-          await updateBooking(data.identityNumber, data);
+          await updateBooking(data.aadharNumber, data);
           toast.success("Booking updated successfully.");
           fetchBookings();
           setLoading(false);
