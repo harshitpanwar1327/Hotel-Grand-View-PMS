@@ -193,11 +193,11 @@ const Rooms = () => {
               </div>
 
               <div>
-                <p className="text-gray-500 text-xs font-medium">Price per day</p>
+                <p className="text-gray-500 text-xs font-medium">Price</p>
                 <p className="font-medium text-lg">₹ {room.pricePerNight.toLocaleString('en-IN')} <span className="text-xs">/day</span></p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <select value={room.status} onChange={(e)=>handleStatusChange(room.roomId, e.target.value)} className="flex-1 rounded-xl border border-gray-200 px-4 py-2 shadow-sm outline-none bg-white">
                   {roomStatus.map((status, index) => (
                     <option key={index} value={status}>

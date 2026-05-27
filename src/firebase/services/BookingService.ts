@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, orderBy, query, QueryConstraint, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../Firebase";
 
 export interface BookingData {
@@ -19,9 +19,9 @@ export interface BookingData {
   totalAmount: number;
 }
 
-interface FilterOptions {
-  status: string;
-  date: string;
+export interface FilterOptions {
+  status?: string;
+  date?: string;
 }
 
 const bookingsRef = collection(db, "bookings");
@@ -51,6 +51,10 @@ export const addBooking = async (data: Partial<BookingData>) => {
       bookingId: bookingRef.id,
     });
 
+    await updateDoc(doc(db, "rooms", data.roomId as string), {
+      status: "Occupied",
+    });
+
     return bookingRef.id;
 
   } catch (error) {
@@ -63,7 +67,9 @@ export const getBookings = async (filters?: FilterOptions) => {
   try {
     const bookingQuery = query(bookingsRef, orderBy("createdAt", "desc"));
 
-    const constraints: any[] = [];
+    const constraints: QueryConstraint[] = [
+      orderBy("createdAt", "desc")
+    ];
 
     if (filters?.status && filters.status !== "All") {
       constraints.push(where("bookingStatus", "==", filters.status));

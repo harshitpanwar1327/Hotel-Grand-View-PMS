@@ -5,6 +5,7 @@ import { ClipLoader } from "react-spinners";
 import { addBooking } from "../../firebase/services/BookingService";
 import { getRooms, type RoomData } from "../../firebase/services/RoomService";
 import { Timestamp } from "firebase/firestore";
+import { formatLocalDate } from "../../utils/Helper";
 
 interface CheckInFormData {
   aadharNumber: string;
@@ -66,7 +67,7 @@ const CheckIn = () => {
     minCheckout.setDate(minCheckout.getDate() + 1);
   }
 
-  const minCheckoutDate = minCheckout.toISOString().split("T")[0];
+  const minCheckoutDate = formatLocalDate(minCheckout);
 
   const selectedRoom = rooms.find((room) => room.roomId === selectedRoomId);
   const pricePerDay = selectedRoom?.pricePerNight || 0;
@@ -202,7 +203,6 @@ const CheckIn = () => {
                 required: "Room is required"
               })}
             >
-              <option value="" disabled>Select</option>
               {filteredRooms.map((room)=>(
                 <option key={room.roomId} value={room.roomId}>#{room.roomNumber} • {room.roomType}</option>
               ))}
