@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Checkout from "../../modals/bookings/Checkout";
+import Invoice from "../../modals/bookings/Invoice";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { getBookings, type BookingData } from "../../firebase/services/BookingService";
 import { formatLocalDate } from "../../utils/Helper";
-import { LogOut } from "lucide-react";
+import { LogOut, FileText } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 
 const statusFilter = ["All", "Active", "Checked Out"];
@@ -18,10 +19,11 @@ const Bookings = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
+  const [openInvoiceModal, setOpenInvoiceModal] = useState<boolean>(false);
 
   const [selectedBooking, setSelectedBooking] = useState<BookingData>({
     aadharNumber: "",
-    bookingId: undefined,
+    bookingId: "",
     bookingStatus: "",
     checkInAt: Timestamp.now(), 
     checkOutAt: Timestamp.now(), 
@@ -62,6 +64,11 @@ const Bookings = () => {
   const handleCheckout = (booking: BookingData) => {
     setSelectedBooking(booking);
     setOpenCheckoutModal(true);
+  }
+
+  const handleInvoice = (booking: BookingData) => {
+    setSelectedBooking(booking);
+    setOpenInvoiceModal(true);
   }
 
   return (
@@ -107,7 +114,7 @@ const Bookings = () => {
                 <th className="px-6 py-3 font-semibold">Total</th>
                 <th className="px-6 py-3 font-semibold">Paid</th>
                 <th className="px-6 py-3 font-semibold">Status</th>
-                {/* <th className="px-6 py-3"></th> */}
+                <th className="px-6 py-3"></th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
@@ -132,11 +139,11 @@ const Bookings = () => {
                       <span className={`flex items-center justify-center px-3 py-1 rounded-full font-medium ${booking.paymentStatus==='Paid' ? 'bg-green-600/10 text-green-600' : 'bg-[#f7ebc8] text-[#5b4720]'}`}>{booking.paymentStatus || '-'}</span>
                     </div>
                   </td>
-                  {/* <td className="px-4 py-3">
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300">
+                  <td className="px-4 py-3">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300" onClick={()=>handleInvoice(booking)}>
                       <FileText className="w-4 h-4 text-gray-500" /> Invoice
                     </button>
-                  </td> */}
+                  </td>
                   <td className="px-4 py-3">
                     {(booking.bookingStatus!=='Checked Out' || booking.paymentStatus==='Partial') &&
                       <button className="flex items-center gap-2 bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300" onClick={()=>handleCheckout(booking)}>
@@ -152,6 +159,7 @@ const Bookings = () => {
       )}
 
       {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />}
+      {openInvoiceModal && <Invoice setOpenModal={setOpenInvoiceModal} selectedBooking={selectedBooking} />}
     </div>
   )
 }
