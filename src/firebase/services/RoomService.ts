@@ -1,4 +1,4 @@
-import { addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, doc, orderBy, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, doc, orderBy, deleteDoc, QueryConstraint } from "firebase/firestore";
 import { db } from "../Firebase";
 
 export interface RoomData {
@@ -45,12 +45,19 @@ export const addRoom = async (data: RoomData) => {
   }
 };
 
-export const getRooms = async () => {
+export const getRooms = async (status?: string) => {
   try {
-    const roomQuery = query(
-      roomsRef,
+    const constraints: QueryConstraint[] = [
       orderBy("roomNumber", "asc")
-    );
+    ];
+
+    if (status && status !== "All") {
+      constraints.push(
+        where("status", "==", status)
+      );
+    }
+
+    const roomQuery = query(roomsRef, ...constraints);
 
     const snapshot = await getDocs(roomQuery);
 

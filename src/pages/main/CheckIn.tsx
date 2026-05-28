@@ -24,8 +24,6 @@ const CheckIn = () => {
 
   const [rooms, setRooms] = useState<RoomData[]>([]);
 
-  const filteredRooms = rooms.filter((room) => room.status === "Available");
-
   const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<CheckInFormData>({});
 
   const selectedRoomId = useWatch({
@@ -40,14 +38,11 @@ const CheckIn = () => {
 
   const fetchRooms = useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await getRooms();
+      const response = await getRooms('Available');
       setRooms(response as RoomData[]);
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch rooms!");
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -211,7 +206,7 @@ const CheckIn = () => {
                 required: "Room is required"
               })}
             >
-              {filteredRooms.map((room)=>(
+              {rooms.map((room)=>(
                 <option key={room.roomId} value={room.roomId}>#{room.roomNumber} • {room.roomType}</option>
               ))}
             </select>

@@ -115,7 +115,6 @@ const Bookings = () => {
                 <th className="px-6 py-3 font-semibold">Paid</th>
                 <th className="px-6 py-3 font-semibold">Status</th>
                 <th className="px-6 py-3"></th>
-                <th className="px-6 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -140,16 +139,15 @@ const Bookings = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300" onClick={()=>handleInvoice(booking)}>
-                      <FileText className="w-4 h-4 text-gray-500" /> Invoice
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    {(booking.bookingStatus!=='Checked Out' || booking.paymentStatus==='Partial') &&
+                    {(booking.bookingStatus==='Checked Out') ? (
+                      <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300" onClick={()=>handleInvoice(booking)}>
+                        <FileText className="w-4 h-4 text-gray-500" /> Invoice
+                      </button>
+                    ) : (
                       <button className="flex items-center gap-2 bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300" onClick={()=>handleCheckout(booking)}>
                         <LogOut className="w-4 h-4 text-white" /> Checkout
                       </button>
-                    }
+                    )}
                   </td>
                 </tr>
               ))}

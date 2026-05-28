@@ -1,11 +1,11 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { deleteRoom, getRooms, updateRoom, type RoomData } from "../../firebase/services/RoomService";
 import Swal from "sweetalert2";
 import { ClipLoader } from "react-spinners";
-import AddRoom from "../../modals/checkin/AddRoom";
-import EditRoom from "../../modals/checkin/EditRoom";
+import AddRoom from "../../modals/rooms/AddRoom";
+import EditRoom from "../../modals/rooms/EditRoom";
 
 const tabStatus = ["All", "Available", "Occupied", "Maintenance"];
 const roomStatus = ["Available", "Occupied", "Maintenance"];
@@ -41,10 +41,10 @@ const Rooms = () => {
     }
   };
 
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getRooms();
+      const response = await getRooms(activeTab);
       setRooms(response as RoomData[]);
     } catch (error) {
       console.log(error);
@@ -52,15 +52,15 @@ const Rooms = () => {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [activeTab]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRooms();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchRooms();
+    }, 500);
 
-  const filteredRooms = activeTab === "All" ? rooms : rooms.filter((room) => room.status === activeTab);
+    return () => clearTimeout(timer);
+  }, [fetchRooms]);
 
   const handleStatusChange = async (roomId: string, newStatus: string) => {
     try {
@@ -154,7 +154,7 @@ const Rooms = () => {
       <div className="flex items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold">Rooms</h1>
-          <p className="text-gray-500 text-sm">{filteredRooms.length} of {rooms.length} rooms</p>
+          <p className="text-gray-500 text-sm">{rooms.length} rooms</p>
         </div>
 
         <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
@@ -174,7 +174,7 @@ const Rooms = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
-          {filteredRooms.map((room) => (
+          {rooms.map((room) => (
             <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <div className="flex items-start justify-between">
                 <div>
