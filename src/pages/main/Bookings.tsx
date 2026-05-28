@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-// import Checkout from "../../modals/bookings/Checkout";
+import Checkout from "../../modals/bookings/Checkout";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { getBookings, type BookingData } from "../../firebase/services/BookingService";
 import { formatLocalDate } from "../../utils/Helper";
-// import { Timestamp } from "firebase/firestore";
+import { LogOut } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 
 const statusFilter = ["All", "Active", "Checked Out"];
 
@@ -16,25 +17,26 @@ const Bookings = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  // const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
+  const [openCheckoutModal, setOpenCheckoutModal] = useState<boolean>(false);
 
-  // const [selectedBooking, setSelectedBooking] = useState<BookingData>({
-  //   aadharNumber: "",
-  //   bookingId: undefined,
-  //   bookingStatus: "",
-  //   checkInAt: Timestamp.now(), 
-  //   checkOutAt: Timestamp.now(), 
-  //   createdBy: "",
-  //   guestName: "",
-  //   numberOfGuests: 0,
-  //   paidAmount: 0,
-  //   paymentMethod: "",
-  //   paymentStatus: "",
-  //   pendingAmount: 0,
-  //   phone: "",
-  //   roomId: "",
-  //   totalAmount: 0,
-  // });
+  const [selectedBooking, setSelectedBooking] = useState<BookingData>({
+    aadharNumber: "",
+    bookingId: undefined,
+    bookingStatus: "",
+    checkInAt: Timestamp.now(), 
+    checkOutAt: Timestamp.now(), 
+    createdBy: "",
+    guestName: "",
+    numberOfGuests: 0,
+    paidAmount: 0,
+    paymentMethod: "",
+    paymentStatus: "",
+    pendingAmount: 0,
+    phone: "",
+    roomId: "",
+    roomNumber: "",
+    totalAmount: 0,
+  });
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -57,10 +59,10 @@ const Bookings = () => {
     return () => clearTimeout(timer);
   }, [fetchBookings]);
 
-  // const handleCheckout = (booking: BookingData) => {
-  //   setSelectedBooking(booking);
-  //   setOpenCheckoutModal(true);
-  // }
+  const handleCheckout = (booking: BookingData) => {
+    setSelectedBooking(booking);
+    setOpenCheckoutModal(true);
+  }
 
   return (
     <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6 overflow-auto">
@@ -105,8 +107,8 @@ const Bookings = () => {
                 <th className="px-6 py-3 font-semibold">Total</th>
                 <th className="px-6 py-3 font-semibold">Paid</th>
                 <th className="px-6 py-3 font-semibold">Status</th>
-                {/* <th className="px-6 py-3"></th>
-                <th className="px-6 py-3"></th> */}
+                {/* <th className="px-6 py-3"></th> */}
+                <th className="px-6 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -134,12 +136,14 @@ const Bookings = () => {
                     <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300">
                       <FileText className="w-4 h-4 text-gray-500" /> Invoice
                     </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1B2A41] text-white shadow-sm font-semibold hover:opacity-90 transition duration-300" onClick={()=>handleCheckout(booking)}>
-                      <LogOut className="w-4 h-4 text-white" /> Checkout
-                    </button>
                   </td> */}
+                  <td className="px-4 py-3">
+                    {(booking.bookingStatus!=='Checked Out' || booking.paymentStatus==='Partial') &&
+                      <button className="flex items-center gap-2 bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300" onClick={()=>handleCheckout(booking)}>
+                        <LogOut className="w-4 h-4 text-white" /> Checkout
+                      </button>
+                    }
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -147,7 +151,7 @@ const Bookings = () => {
         </div>
       )}
 
-      {/* {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />} */}
+      {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />}
     </div>
   )
 }

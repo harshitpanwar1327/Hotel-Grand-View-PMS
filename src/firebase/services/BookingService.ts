@@ -108,3 +108,34 @@ export const getBookings = async (filters?: FilterOptions) => {
     throw error;
   }
 };
+
+export const checkOut = async (bookingId: string, roomId: string, previousPaidAmount: number, previousPendingAmount: number, collectedAmount: number, paymentMethod: string) => {
+  try {
+    const updatedPaidAmount = previousPaidAmount + collectedAmount;
+    const updatedPendingAmount = previousPendingAmount - collectedAmount;
+
+    await updateDoc(
+      doc(db, "bookings", bookingId),
+      {
+        paidAmount: updatedPaidAmount,
+        pendingAmount: updatedPendingAmount,
+        paymentMethod,
+        paymentStatus: updatedPendingAmount === 0 ? "Paid" : "Partial",
+        bookingStatus: "Checked Out",
+        checkedOutAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    await updateDoc(
+      doc(db, "rooms", roomId),
+      {
+        status: "Available",
+        updatedAt: serverTimestamp()
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}

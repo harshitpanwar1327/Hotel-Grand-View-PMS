@@ -149,10 +149,10 @@ const CheckIn = () => {
                 required: "Phone number is required",
                 validate: (value) => {
                   const cleaned = value.replace(/[\s()-]/g, "");
-                  const phoneRegex = /^(\+?\d{7,15})$/;
+                  const phoneRegex = /^(?:\+?91)?([6-9]\d{9})$/;
                   return (
                     phoneRegex.test(cleaned) ||
-                    "Enter a valid phone number"
+                    "Enter a valid 10-digit phone number"
                   );
                 },
               })}
@@ -261,7 +261,7 @@ const CheckIn = () => {
           <div className="bg-gray-200 rounded-xl p-4 flex flex-col gap-1">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Stay Total</p>
             <h3 className="text-2xl font-semibold">₹ {stayTotal.toLocaleString('en-IN')}</h3>
-            <p className="text-xs text-gray-500">1 day • ₹{pricePerDay.toLocaleString('en-IN')}/day</p>
+            <p className="text-xs text-gray-500">{totalDays} {totalDays !== 1 ? 'days' : 'day'} • ₹{pricePerDay.toLocaleString('en-IN')}/day</p>
           </div>
         </div>
 
