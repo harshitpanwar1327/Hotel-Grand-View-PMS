@@ -24,7 +24,7 @@ const Login = () => {
       const user = await loginUser(data.email, data.password);
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("userId", user.uid);
-      sessionStorage.setItem("userEmail", user.email);
+      sessionStorage.setItem("userEmail", user.email || "");
       sessionStorage.setItem("userRole", user.role);
       toast.success("Logged in successfully");
       navigate('/dashboard');

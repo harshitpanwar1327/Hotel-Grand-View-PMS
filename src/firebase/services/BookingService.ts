@@ -30,6 +30,11 @@ const email = sessionStorage.getItem('userEmail');
 
 export const addBooking = async (data: Partial<BookingData>) => {
   try {
+    const totalAmount = data.totalAmount || 0;
+    const paidAmount = data.paidAmount || 0;
+
+    const pendingAmount = totalAmount - paidAmount;
+
     const bookingRef = await addDoc(bookingsRef, {
       aadharNumber: data.aadharNumber,
       bookingStatus: 'Active',
@@ -38,14 +43,14 @@ export const addBooking = async (data: Partial<BookingData>) => {
       createdBy: email,
       guestName: data.guestName,
       numberOfGuests: data.numberOfGuests,
-      paidAmount: data.paidAmount,
+      paidAmount,
       paymentMethod: data.paymentMethod,
-      paymentStatus: (data.totalAmount - data.paidAmount) === 0 ? 'Paid' : 'Partial',
-      pendingAmount: data.totalAmount - data.paidAmount,
+      paymentStatus: pendingAmount === 0 ? 'Paid' : 'Partial',
+      pendingAmount,
       phone: data.phone,
       roomId: data.roomId,
       roomNumber: data.roomNumber,
-      totalAmount: data.totalAmount,
+      totalAmount,
       createdAt: serverTimestamp()
     });
 
