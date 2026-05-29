@@ -149,18 +149,18 @@ const Navigation = () => {
 
               <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
                 {role==="admin" &&
-                  <NavLink to="/dashboard" className={navClass}>
+                  <NavLink to="/dashboard" className={navClass} onClick={()=>setIsOpen(false)}>
                     <LayoutDashboard size={18} /> Dashboard
                   </NavLink>
                 }
-                <NavLink to="/check-in" className={navClass}>
+                <NavLink to="/check-in" className={navClass} onClick={()=>setIsOpen(false)}>
                   <UserPlus size={18} /> Check In
                 </NavLink>
-                <NavLink to="/bookings" className={navClass}>
+                <NavLink to="/bookings" className={navClass} onClick={()=>setIsOpen(false)}>
                   <ClipboardList size={18} /> Bookings
                 </NavLink>
                 {role==="admin" &&
-                  <NavLink to="/rooms" className={navClass}>
+                  <NavLink to="/rooms" className={navClass} onClick={()=>setIsOpen(false)}>
                     <BedDouble size={18} /> Rooms
                   </NavLink>
                 }

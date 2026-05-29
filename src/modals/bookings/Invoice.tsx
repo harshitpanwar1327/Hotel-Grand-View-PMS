@@ -5,14 +5,12 @@ import { Timestamp } from "firebase/firestore";
 import FeedbackQR from '../../assets/FeedbackQR.png';
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { WhatsApp } from "@mui/icons-material";
+import InvoiceContent from "../../components/InvoiceContent";
 
 interface InvoiceProps {
   setOpenModal: (open: boolean) => void;
   selectedBooking: BookingData;
 }
-
-const whatsapp = '8595994381';
 
 const formatDate = (date: Timestamp | Date) => {
   if (!date) return "-";
@@ -37,43 +35,26 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
 
   const generatePDF = async (): Promise<Blob> => {
     if (!invoiceRef.current) {
-        throw new Error("Invoice not found!");
+      throw new Error("Invoice not found!");
     }
 
-    const element = invoiceRef.current;
-
-    const originalOverflow = element.style.overflow;
-    const originalMaxHeight = element.style.maxHeight;
-    const originalHeight = element.style.height;
-
-    element.style.overflow = "visible";
-    element.style.maxHeight = "none";
-    element.style.height = "auto";
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        scrollY: -window.scrollY,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+    const canvas = await html2canvas(invoiceRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
     });
-
-    element.style.overflow = originalOverflow;
-    element.style.maxHeight = originalMaxHeight;
-    element.style.height = originalHeight;
 
     const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const pdfHeight = 297;
 
-    const imgWidth = pdfWidth;
+    const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     let heightLeft = imgHeight;
@@ -84,10 +65,10 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
     heightLeft -= pdfHeight;
 
     while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
     }
 
     return pdf.output("blob");
@@ -107,70 +88,13 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
     }
   }
 
-  const handleWhatsAppShare = async () => {
-
-  try {
-
-    const pdfBlob = await generatePDF();
-
-    const file = new File(
-      [pdfBlob],
-      `Invoice-${selectedBooking.bookingId}.pdf`,
-      {
-        type: "application/pdf"
-      }
-    );
-
-    // Mobile native sharing
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-
-      await navigator.share({
-        files: [file],
-        title: "Hotel Invoice",
-        text: `Invoice for booking ${selectedBooking.bookingId}`
-      });
-
-      return;
-    }
-
-    // Fallback for desktop
-    const url = URL.createObjectURL(file);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Invoice-${selectedBooking.bookingId}.pdf`;
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
-
-    window.open(
-      `https://wa.me/${whatsapp}?text=${encodeURIComponent(
-        `Invoice for booking ${selectedBooking.bookingId}`
-      )}`,
-      "_blank"
-    );
-
-  } catch (error) {
-
-    console.log(error);
-
-  }
-
-};
-
   return (
-    <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-8 bg-black/70 z-60' onClick={()=>setOpenModal(false)}>
+    <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-4 bg-black/70 z-60' onClick={()=>setOpenModal(false)}>
       <div onClick={(e)=>e.stopPropagation()} className="flex flex-col gap-6 max-h-[90vh] overflow-y-auto bg-[#ffffff] w-full md:w-2/3 lg:w-1/2 rounded-xl p-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={handlePrint}>
-              <Printer className="w-4 h-4" /> Print/Save PDF
-            </button>
-            <button className="flex items-center gap-2 bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,45%)]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={handleWhatsAppShare}>
-              <WhatsApp  className="w-4 h-4" /> Share Invoice
+            <button className="flex items-center gap-2 bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] text-sm px-4 py-2 rounded-2xl shadow-sm transition duration-300" onClick={handlePrint}>
+              <Printer /> <span className="hidden md:inline">Print/Save PDF</span>
             </button>
           </div>
           <X size={18} className="cursor-pointer text-[#6B7280] hover:text-[#000000] hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>
@@ -178,8 +102,8 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
 
         <hr className="text-[#E5E7EB]" />
 
-        <div ref={invoiceRef} className="flex flex-col gap-4 p-4">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold">Hotel Grand View</h1>
               <p className="text-[#6B7280] text-sm max-w-xs">
@@ -220,7 +144,7 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
             </div>
           </div>
 
-          <div className="border border-[#E5E7EB] rounded-xl p-2">
+          <div className="border border-[#E5E7EB] rounded-xl p-2 overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-[#F9FAFB] text-xs text-[#6B7280] uppercase">
@@ -241,7 +165,7 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
             </table>
           </div>
 
-          <div className="w-1/2 ml-auto">
+          <div className="w-full md:w-1/2 ml-auto">
             <div className="flex justify-between font-bold">
               <span>Total</span>
               <span>₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</span>
@@ -262,13 +186,19 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
 
           <hr className="border-0 border-t border-dashed border-[#E5E7EB]" />
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             <div>
               <h3 className="font-semibold">We value your feedback!</h3>
               <p className="text-[#6B7280] text-sm">Scan the QR code to rate your stay and share your experience.</p>
             </div>
 
             <img src={FeedbackQR} className="w-32 h-32 border border-[#E5E7EB] rounded-xl" />
+          </div>
+        </div>
+
+        <div className="absolute -left-9999 top-0">
+          <div ref={invoiceRef}>
+            <InvoiceContent selectedBooking={selectedBooking} />
           </div>
         </div>
       </div>
