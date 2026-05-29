@@ -142,14 +142,10 @@ const CheckIn = () => {
             <input type="tel" id="phone" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter phone number"
               {...register("phone", {
                 required: "Phone number is required",
-                validate: (value) => {
-                  const cleaned = value.replace(/[\s()-]/g, "");
-                  const phoneRegex = /^(?:\+?91)?([6-9]\d{9})$/;
-                  return (
-                    phoneRegex.test(cleaned) ||
-                    "Enter a valid 10-digit phone number"
-                  );
-                },
+                pattern: {
+                  value: /^[6-9]\d{9}$/,
+                  message: "Enter a valid 10-digit phone number"
+                }
               })}
             />
             {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}

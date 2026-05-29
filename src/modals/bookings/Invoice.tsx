@@ -1,142 +1,277 @@
-import { Printer, X } from "lucide-react"
+import { Printer, X } from "lucide-react";
 import { type BookingData } from "../../firebase/services/BookingService";
 import { useRef } from "react";
 import { Timestamp } from "firebase/firestore";
+import FeedbackQR from '../../assets/FeedbackQR.png';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { WhatsApp } from "@mui/icons-material";
 
 interface InvoiceProps {
   setOpenModal: (open: boolean) => void;
   selectedBooking: BookingData;
 }
 
+const whatsapp = '8595994381';
+
+const formatDate = (date: Timestamp | Date) => {
+  if (!date) return "-";
+
+  const d = date instanceof Timestamp ? date.toDate() : date;
+
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+}
+
 const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
-    const invoiceRef = useRef<HTMLDivElement>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
-    const formatDate = (date: Timestamp | Date) => {
-        if (!date) return "-";
+  const checkInDate = selectedBooking.checkInAt?.toDate();
+  const checkOutDate = selectedBooking.checkOutAt?.toDate();
 
-        const d = date instanceof Timestamp ? date.toDate() : date;
+  const totalDays = (checkInDate && checkOutDate)
+    ? Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))) : 1;
 
-        return d.toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        })
+  const generatePDF = async (): Promise<Blob> => {
+    if (!invoiceRef.current) {
+        throw new Error("Invoice not found!");
     }
 
-    const calculateNights = () => {
-        const checkIn =
-            selectedBooking?.checkInAt instanceof Timestamp
-                ? selectedBooking.checkInAt.toDate()
-                : new Date(selectedBooking.checkInAt);
+    const element = invoiceRef.current;
 
-        const checkOut =
-            selectedBooking?.checkOutAt instanceof Timestamp
-                ? selectedBooking.checkOutAt.toDate()
-                : new Date(selectedBooking.checkOutAt);
+    const originalOverflow = element.style.overflow;
+    const originalMaxHeight = element.style.maxHeight;
+    const originalHeight = element.style.height;
 
-        const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    element.style.overflow = "visible";
+    element.style.maxHeight = "none";
+    element.style.height = "auto";
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        scrollY: -window.scrollY,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+    });
+
+    element.style.overflow = originalOverflow;
+    element.style.maxHeight = originalMaxHeight;
+    element.style.height = originalHeight;
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+
+    heightLeft -= pdfHeight;
+
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
     }
+
+    return pdf.output("blob");
+  };
+
+  const handlePrint = async () => {
+    const pdfBlob = await generatePDF()
+    const url = URL.createObjectURL(pdfBlob)
+
+    const iframe = document.createElement("iframe")
+    iframe.style.display = "none"
+    iframe.src = url
+    document.body.appendChild(iframe)
+
+    iframe.onload = () => {
+      iframe.contentWindow?.print()
+    }
+  }
+
+  const handleWhatsAppShare = async () => {
+
+  try {
+
+    const pdfBlob = await generatePDF();
+
+    const file = new File(
+      [pdfBlob],
+      `Invoice-${selectedBooking.bookingId}.pdf`,
+      {
+        type: "application/pdf"
+      }
+    );
+
+    // Mobile native sharing
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+
+      await navigator.share({
+        files: [file],
+        title: "Hotel Invoice",
+        text: `Invoice for booking ${selectedBooking.bookingId}`
+      });
+
+      return;
+    }
+
+    // Fallback for desktop
+    const url = URL.createObjectURL(file);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Invoice-${selectedBooking.bookingId}.pdf`;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    window.open(
+      `https://wa.me/${whatsapp}?text=${encodeURIComponent(
+        `Invoice for booking ${selectedBooking.bookingId}`
+      )}`,
+      "_blank"
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
 
   return (
-    <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-8 bg-black/70 z-60 overflow-y-auto' onClick={()=>setOpenModal(false)}>
-        <div onClick={(e)=>e.stopPropagation()} className="bg-[#ffffff] w-full md:w-2/3 lg:w-1/2 rounded-xl flex flex-col gap-4 p-4 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
-                <button className="flex items-center gap-2 bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] px-4 py-2 rounded-xl hover:opacity-90 transition duration-300">
-                    <Printer className="w-4 h-4 text-[#ffffff]" /> Print/Save PDF
-                </button>
-                <X size={18} className="cursor-pointer text-[#6B7280] hover:text-black hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>
-            </div>
-
-            <div ref={invoiceRef} className="p-2 md:p-4 text-[#111827] bg-[#ffffff]">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold">Taj Heritage Stay</h1>
-                        <div className="text-[#6B7280] text-sm">
-                            <p>Fatehabad Road, Near Taj Mahal, Agra 282001</p>
-                            <p>+91 93112 01990 • GSTIN 09ABCDE1234F1Z5</p>
-                        </div>
-                    </div>
-                    <div className="text-left md:text-right md:mt-0 mt-4">
-                        <p className="uppercase text-lg text-[#9CA3AF]">Invoice</p>
-                        <h2 className="text-sm font-bold">{selectedBooking?.bookingId || "INV-1001"}</h2>
-                        <p className="text-[#6B7280] text-sm">{formatDate(new Date())}</p>
-                    </div>
-                </div>
-
-                <div className="border-b border-[#E5E7EB] my-4" />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <p className="uppercase text-[#6B7280] text-sm font-semibold">Billed To</p>
-                        <div className="mt-1">
-                            <h3 className="text-md font-semibold">{selectedBooking?.guestName}</h3>
-                            <p className="text-[#374151] text-sm">{selectedBooking?.phone}</p>
-                            {selectedBooking?.aadharNumber && (
-                            <p className="text-[#6B7280] text-sm">Aadhaar: {selectedBooking?.aadharNumber}</p>)}
-                        </div>
-                    </div>
-
-                    <div>
-                        <p className="uppercase text-[#6B7280] text-sm font-semibold">Stay</p>
-                        <div className="mt-1">
-                            <h3 className="text-md font-semibold">Room #{selectedBooking?.roomNumber}</h3>
-                            <p className="text-sm">
-                                {formatDate(selectedBooking?.checkInAt)} →{" "}
-                                {formatDate(selectedBooking?.checkOutAt)}
-                            </p>
-                            <p className="text-[#4B5563] text-sm">{calculateNights()} nights</p>
-                            <p className="text-[#4B5563] text-sm">Guests: {selectedBooking?.numberOfGuests}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-8 overflow-hidden border border-[#E5E7EB] rounded-xl">
-                    <div className="grid grid-cols-12 bg-[#F9FAFB] px-4 py-2 border-b border-[#E5E7EB] text-[#6B7280] uppercase text-xs font-semibold">
-                        <div className="col-span-6">Description</div>
-                        <div className="col-span-2 text-center">Qty</div>
-                        <div className="col-span-2 text-center">Rate</div>
-                        <div className="col-span-2 text-right">Amount</div>
-                    </div>
-                    <div className="grid grid-cols-12 px-4 py-2 text-sm items-center">
-                        <p className="col-span-6">Room Charges (Room #{selectedBooking?.roomNumber})</p>
-                        <p className="col-span-2 text-center">{calculateNights()}</p>
-                        <p className="col-span-2 text-center">₹{Math.floor(selectedBooking?.totalAmount / calculateNights()).toLocaleString("en-IN")}</p>
-                        <p className="col-span-2 text-right font-medium">₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</p>
-                    </div>
-                </div>
-
-                <div className="flex justify-end mt-5">
-                    <div className="w-full md:w-95">
-                        <div className="flex justify-between text-md font-bold">
-                            <span>Total</span>
-                            <span>₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</span>
-                        </div>
-                        <div className="flex justify-between text-sm text-[#4B5563]">
-                            <span>Paid</span>
-                            <span>₹{selectedBooking?.paidAmount?.toLocaleString("en-IN")}</span>
-                        </div>
-                        <div className="flex justify-between text-sm text-[#4B5563]">
-                            <span>Balance</span>
-                            <span>₹{selectedBooking?.pendingAmount?.toLocaleString("en-IN")}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-8 text-sm text-[#4B5563]">
-                    <span className="font-semibold">Payment Method:</span>{" "}{selectedBooking?.paymentMethod || "-"}
-                </div>
-
-                <div className="border-t border-dashed border-[#D1D5DB] mt-5 pt-6 flex flex-col md:flex-row items-center gap-6">
-                    {/* qr code */}
-                    <div className="w-32 h-32 border border-[#D1D5DB] rounded-xl flex items-center justify-center text-[#9CA3AF]">QR Code</div>
-                    <div>
-                        <h3 className="text-md font-semibold">We value your feedback!</h3>
-                        <p className="text-[#6B7280] text-sm">Scan the QR code to rate your stay and share your experience.</p>
-                    </div>
-                </div>
-            </div>
+    <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-8 bg-black/70 z-60' onClick={()=>setOpenModal(false)}>
+      <div onClick={(e)=>e.stopPropagation()} className="flex flex-col gap-6 max-h-[90vh] overflow-y-auto bg-[#ffffff] w-full md:w-2/3 lg:w-1/2 rounded-xl p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={handlePrint}>
+              <Printer className="w-4 h-4" /> Print/Save PDF
+            </button>
+            <button className="flex items-center gap-2 bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,45%)]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-[#ffffff] text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={handleWhatsAppShare}>
+              <WhatsApp  className="w-4 h-4" /> Share Invoice
+            </button>
+          </div>
+          <X size={18} className="cursor-pointer text-[#6B7280] hover:text-[#000000] hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>
         </div>
+
+        <hr className="text-[#E5E7EB]" />
+
+        <div ref={invoiceRef} className="flex flex-col gap-4 p-4">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div>
+              <h1 className="text-xl font-bold">Hotel Grand View</h1>
+              <p className="text-[#6B7280] text-sm max-w-xs">
+                Fatehabad Road, Near Taj Mahal, Agra 282001, +91 7017656483
+              </p>
+            </div>
+
+            <div className="text-left md:text-right">
+              <h2 className="uppercase text-lg text-[#6B7280] font-medium">Invoice</h2>
+              <p className="text-sm font-bold">{selectedBooking?.bookingId || "-"}</p>
+              <p className="text-[#6B7280] text-sm">{formatDate(new Date())}</p>
+            </div>
+          </div>
+
+          <hr className="text-[#E5E7EB]" />
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <h2 className="uppercase text-sm text-[#6B7280] font-medium">Billed To</h2>
+              <div>
+                <h3 className="font-semibold">{selectedBooking?.guestName}</h3>
+                <p className="text-sm">{selectedBooking?.phone}</p>
+                {selectedBooking?.aadharNumber && (
+                <p className="text-sm">Aadhar No: {selectedBooking?.aadharNumber}</p>)}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h2 className="uppercase text-sm text-[#6B7280] font-medium">Stay</h2>
+              <div>
+                <h3 className="font-semibold">Room #{selectedBooking?.roomNumber}</h3>
+                <p className="text-sm">
+                  {formatDate(selectedBooking?.checkInAt)} →{" "} {formatDate(selectedBooking?.checkOutAt)}
+                </p>
+                <p className="text-sm">{totalDays} days</p>
+                <p className="text-sm">Guests: {selectedBooking?.numberOfGuests}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-[#E5E7EB] rounded-xl p-2">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F9FAFB] text-xs text-[#6B7280] uppercase">
+                  <th className="text-left p-3">Description</th>
+                  <th className="p-3">Days</th>
+                  <th className="p-3">Per day price</th>
+                  <th className="text-right p-3">Total Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="text-sm">
+                  <td className="text-left p-3">Room Charges (Room #{selectedBooking?.roomNumber})</td>
+                  <td className="text-center p-3">{totalDays}</td>
+                  <td className="text-center p-3">₹{Math.floor(selectedBooking?.totalAmount / totalDays).toLocaleString("en-IN")}</td>
+                  <td className="text-right p-3">₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="w-1/2 ml-auto">
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span>₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</span>
+            </div>
+            <div className="flex justify-between text-sm text-[#6B7280]">
+              <span>Paid</span>
+              <span>₹{selectedBooking?.paidAmount?.toLocaleString("en-IN")}</span>
+            </div>
+            <div className="flex justify-between text-sm text-[#6B7280]">
+              <span>Balance</span>
+              <span>₹{selectedBooking?.pendingAmount?.toLocaleString("en-IN")}</span>
+            </div>
+          </div>
+
+          <div className="text-sm text-[#6B7280]">
+            <strong>Payment Method:</strong>{" "}{selectedBooking?.paymentMethod || "-"}
+          </div>
+
+          <hr className="border-0 border-t border-dashed border-[#E5E7EB]" />
+
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-semibold">We value your feedback!</h3>
+              <p className="text-[#6B7280] text-sm">Scan the QR code to rate your stay and share your experience.</p>
+            </div>
+
+            <img src={FeedbackQR} className="w-32 h-32 border border-[#E5E7EB] rounded-xl" />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
