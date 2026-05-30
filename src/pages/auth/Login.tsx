@@ -22,6 +22,10 @@ const Login = () => {
     try {
       setLoading(true);
       const user = await loginUser(data.email, data.password);
+      if (!user.isActive) {
+        toast.error("Your account is currently inactive. Please contact the administrator to activate your account.");
+        return;
+      }
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("userId", user.uid);
       sessionStorage.setItem("userEmail", user.email || "");

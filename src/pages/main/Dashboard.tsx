@@ -13,7 +13,6 @@ const Dashboard = () => {
     todayCheckIns: [],
     todayCheckOuts: []
   });
-  console.log(dashboardData);
   
   const [loading, setLoading] = useState<boolean>(false);
 

@@ -13,12 +13,12 @@ export const loginUser = async (email: string, password: string) => {
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-        throw new Error("User document not found!");
+      throw new Error("User document not found!");
     }
 
     const userData = userSnap.data();
 
-    return { uid: firebaseUser.uid, email: firebaseUser.email, role: userData.role }
+    return { uid: firebaseUser.uid, email: firebaseUser.email, role: userData.role, isActive: userData.isActive }
     
   } catch (error) {
     console.log(error);
