@@ -67,7 +67,7 @@ const Navigation = () => {
             <Hotel size={20} />
           </div>
           <div>
-            <h2 className='font-semibold'>Hotel Grand View</h2>
+            <h2 className='font-semibold'>RC Stays & Resorts</h2>
             <p className='text-xs text-gray-500 font-medium'>Reception Console</p>
           </div>
         </div>
@@ -142,7 +142,7 @@ const Navigation = () => {
                   <Hotel size={20} />
                 </div>
                 <div>
-                  <h2 className='font-semibold'>Hotel Grand View</h2>
+                  <h2 className='font-semibold'>RC Stays & Resorts</h2>
                   <p className='text-xs text-gray-500 font-medium'>Reception Console</p>
                 </div>
               </div>

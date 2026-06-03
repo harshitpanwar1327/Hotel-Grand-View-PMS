@@ -105,7 +105,7 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold">Hotel Grand View</h1>
+              <h1 className="text-xl font-bold">RC Stays & Resorts</h1>
               <p className="text-[#6B7280] text-sm max-w-xs">
                 Fatehabad Road, Near Taj Mahal, Agra 282001, +91 7017656483
               </p>
