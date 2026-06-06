@@ -1,9 +1,22 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoutes = () => {
-  const isAuthenticated: boolean = sessionStorage.getItem('isAuthenticated') === 'true';
-
-  return isAuthenticated? <Outlet /> : <Navigate to={'/login'}/>
+interface ProtectedRoutesProps {
+  allowedRoles: string[];
 }
 
-export default ProtectedRoutes
+const ProtectedRoutes = ({ allowedRoles }: ProtectedRoutesProps) => {
+  const isAuthenticated = sessionStorage.getItem("isAuthenticated") === "true";
+  const role = sessionStorage.getItem("userRole");
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!role || !allowedRoles.includes(role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default ProtectedRoutes;

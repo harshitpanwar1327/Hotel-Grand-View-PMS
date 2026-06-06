@@ -41,7 +41,7 @@ const Navigation = () => {
       if (result.isConfirmed) {
         try {
           sessionStorage.clear();
-          navigate('/login');
+          navigate('/');
           Swal.fire({
             title: "Logged out!",
             text: "You have been successfully logged out.",
@@ -73,7 +73,7 @@ const Navigation = () => {
         </div>
 
         <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-          {role==="admin" &&
+          {role==="owner" &&
             <NavLink to="/dashboard" className={navClass}>
               <LayoutDashboard size={18} /> Dashboard
             </NavLink>
@@ -84,7 +84,7 @@ const Navigation = () => {
           <NavLink to="/bookings" className={navClass}>
             <ClipboardList size={18} /> Bookings
           </NavLink>
-          {role==="admin" &&
+          {role==="owner" &&
             <NavLink to="/rooms" className={navClass}>
               <BedDouble size={18} /> Rooms
             </NavLink>
@@ -96,7 +96,7 @@ const Navigation = () => {
             <div className="w-10 h-10 bg-[#1B2A41] text-white rounded-lg text-lg font-semibold flex justify-center items-center shrink-0">{(email?.[0])?.toUpperCase()}</div>
             <div className='min-w-0'>
               <h3 className='text-sm font-semibold truncate'>{email}</h3>
-              <p className='text-xs text-gray-500 font-medium truncate'>Admin Account</p>
+              <p className='text-xs text-gray-500 font-medium truncate'><span className="capitalize">{role}</span> Account</p>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ const Navigation = () => {
               </div>
 
               <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-                {role==="admin" &&
+                {role==="owner" &&
                   <NavLink to="/dashboard" className={navClass} onClick={()=>setIsOpen(false)}>
                     <LayoutDashboard size={18} /> Dashboard
                   </NavLink>
@@ -159,7 +159,7 @@ const Navigation = () => {
                 <NavLink to="/bookings" className={navClass} onClick={()=>setIsOpen(false)}>
                   <ClipboardList size={18} /> Bookings
                 </NavLink>
-                {role==="admin" &&
+                {role==="owner" &&
                   <NavLink to="/rooms" className={navClass} onClick={()=>setIsOpen(false)}>
                     <BedDouble size={18} /> Rooms
                   </NavLink>
@@ -171,7 +171,7 @@ const Navigation = () => {
                   <div className="w-10 h-10 bg-[#1B2A41] text-white rounded-lg text-lg font-semibold flex justify-center items-center shrink-0">{(email?.[0])?.toUpperCase()}</div>
                   <div className='min-w-0'>
                     <h3 className='text-sm font-semibold truncate'>{email}</h3>
-                    <p className='text-xs text-gray-500 font-medium truncate'>Admin Account</p>
+                    <p className='text-xs text-gray-500 font-medium truncate'><span className="capitalize">{role}</span> Account</p>
                   </div>
                 </div>
 

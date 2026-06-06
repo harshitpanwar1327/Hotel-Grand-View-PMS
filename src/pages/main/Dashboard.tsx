@@ -173,9 +173,11 @@ const Dashboard = () => {
                         </tr>
                       ))
                     ) : (
-                      <td colSpan={6} className="text-center py-20 text-sm text-gray-500">
-                        No checkouts today
-                      </td>
+                      <tr>
+                        <td colSpan={6} className="text-center py-20 text-sm text-gray-500">
+                          No checkouts today
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>

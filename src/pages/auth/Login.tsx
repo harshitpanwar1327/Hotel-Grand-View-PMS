@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form"
 import { ClipLoader } from "react-spinners"
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-import { FirebaseError } from "firebase/app"
 import { Hotel } from "lucide-react"
 import { loginUser } from "../../firebase/services/AuthService"
 
@@ -21,25 +20,36 @@ const Login = () => {
   const onSubmit = async (data: LoginInputs) => {
     try {
       setLoading(true);
-      const user = await loginUser(data.email, data.password);
-      if (!user.isActive) {
-        toast.error("Your account is currently inactive. Please contact the administrator to activate your account.");
+      const result = await loginUser(data.email, data.password);
+
+      if (!result.success) {
+        toast.error(result.message);
         return;
       }
+
+      const user = result.data;
+
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("userId", user.uid);
       sessionStorage.setItem("userEmail", user.email || "");
       sessionStorage.setItem("userRole", user.role);
+
       toast.success("Logged in successfully");
-      navigate('/dashboard');
-    } catch (error) {
-      console.log(error);
-      const err = error as FirebaseError;
-      if (err.code === "auth/invalid-credential") {
-        toast.error("Invalid email or password!");
-      } else {
-        toast.error("Something went wrong!");
+      
+      switch (user.role) {
+        case "owner":
+          navigate("/dashboard");
+          break;
+        case "receptionist":
+          navigate("/check-in");
+          break;
+        default:
+          navigate("/");
+          break;
       }
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
