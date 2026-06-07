@@ -2,6 +2,7 @@ import { addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, 
 import { db } from "../Firebase";
 
 export interface RoomData {
+  hotelId: string;
   pricePerNight: number;
   roomId: string;
   roomNumber: string;
@@ -30,7 +31,7 @@ export const addRoom = async (data: RoomData) => {
       pricePerNight: data.pricePerNight,
       status: data.status,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
 
     await updateDoc(doc(db, "rooms", roomRef.id), {

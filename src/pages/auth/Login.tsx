@@ -37,10 +37,10 @@ const Login = () => {
       toast.success("Logged in successfully");
       
       switch (user.role) {
-        case "owner":
+        case "Owner":
           navigate("/dashboard");
           break;
-        case "receptionist":
+        case "Receptionist":
           navigate("/check-in");
           break;
         default:

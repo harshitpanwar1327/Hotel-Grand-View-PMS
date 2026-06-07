@@ -8,6 +8,7 @@ const Dashboard = lazy(() => import('./pages/main/Dashboard'));
 const CheckIn = lazy(() => import('./pages/main/CheckIn'));
 const Bookings = lazy(() => import('./pages/main/Bookings'));
 const Rooms = lazy(() => import('./pages/main/Rooms'));
+const Hotels = lazy(() => import('./pages/main/Hotels'));
 const Navigation = lazy(() => import('./components/Navigation'));
 
 function App() {
@@ -24,12 +25,13 @@ function App() {
         <Routes>
           <Route path='/' element={isAuthenticated? <Navigate to={'/dashboard'}/> : <Login />} />
 
-          <Route element={<ProtectedRoutes allowedRoles={["owner"]} />}>
+          <Route element={<ProtectedRoutes allowedRoles={["Owner"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/rooms" element={<Rooms />} />
+            <Route path="/hotels" element={<Hotels />} />
           </Route>
 
-          <Route element={<ProtectedRoutes allowedRoles={["owner", "receptionist"]}/>}>
+          <Route element={<ProtectedRoutes allowedRoles={["Owner", "Receptionist"]}/>}>
             <Route path="/check-in" element={<CheckIn />} />
             <Route path="/bookings" element={<Bookings />} />
           </Route>

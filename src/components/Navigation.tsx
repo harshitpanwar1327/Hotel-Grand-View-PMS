@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import { Hotel, LayoutDashboard, UserPlus, ClipboardList, BedDouble } from "lucide-react"
+import { Hotel, LayoutDashboard, UserPlus, ClipboardList, BedDouble, HotelIcon } from "lucide-react"
 import { Logout, Menu } from "@mui/icons-material"
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -73,7 +73,7 @@ const Navigation = () => {
         </div>
 
         <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-          {role==="owner" &&
+          {role==="Owner" &&
             <NavLink to="/dashboard" className={navClass}>
               <LayoutDashboard size={18} /> Dashboard
             </NavLink>
@@ -84,9 +84,14 @@ const Navigation = () => {
           <NavLink to="/bookings" className={navClass}>
             <ClipboardList size={18} /> Bookings
           </NavLink>
-          {role==="owner" &&
+          {role==="Owner" &&
             <NavLink to="/rooms" className={navClass}>
               <BedDouble size={18} /> Rooms
+            </NavLink>
+          }
+          {role==="Owner" &&
+            <NavLink to="/hotels" className={navClass}>
+              <HotelIcon size={18} /> Hotels
             </NavLink>
           }
         </div>
@@ -148,7 +153,7 @@ const Navigation = () => {
               </div>
 
               <div className="grow flex flex-col gap-2 p-4 overflow-y-auto">
-                {role==="owner" &&
+                {role==="Owner" &&
                   <NavLink to="/dashboard" className={navClass} onClick={()=>setIsOpen(false)}>
                     <LayoutDashboard size={18} /> Dashboard
                   </NavLink>
@@ -159,9 +164,14 @@ const Navigation = () => {
                 <NavLink to="/bookings" className={navClass} onClick={()=>setIsOpen(false)}>
                   <ClipboardList size={18} /> Bookings
                 </NavLink>
-                {role==="owner" &&
+                {role==="Owner" &&
                   <NavLink to="/rooms" className={navClass} onClick={()=>setIsOpen(false)}>
                     <BedDouble size={18} /> Rooms
+                  </NavLink>
+                }
+                {role==="Owner" &&
+                  <NavLink to="/hotels" className={navClass} onClick={()=>setIsOpen(false)}>
+                    <HotelIcon size={18} /> Hotels
                   </NavLink>
                 }
               </div>
