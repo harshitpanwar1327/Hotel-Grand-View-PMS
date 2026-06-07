@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getHotels } from '../../firebase/services/HotelService';
 import type { Timestamp } from 'firebase/firestore';
 
-export interface HotelFirestore {
+interface HotelFirestore {
   address: string;
   createdAt?: Timestamp | null;
   hotelId: string;
@@ -75,7 +75,7 @@ export const hotelSlice = createSlice({
 
       .addCase(fetchHotels.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to fetch hotel data.";
+        state.error = action.payload || "Failed to fetch hotels.";
       });
   },
 })

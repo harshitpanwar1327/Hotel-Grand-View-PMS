@@ -1,48 +1,36 @@
 import { addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, doc, orderBy, deleteDoc, QueryConstraint } from "firebase/firestore";
 import { db } from "../Firebase";
-
-export interface RoomData {
-  hotelId: string;
-  pricePerNight: number;
-  roomId: string;
-  roomNumber: string;
-  roomType: string;
-  status: string;
-}
+import type { RoomData } from "../../redux/slice/RoomSlice";
 
 const roomsRef = collection(db, "rooms");
 
 export const addRoom = async (data: RoomData) => {
   try {
-    const roomQuery = query(
+    const roomsQuery = query(
       roomsRef,
       where("roomNumber", "==", data.roomNumber)
     );
 
-    const roomSnapshot = await getDocs(roomQuery);
+    const roomsSnapshot = await getDocs(roomsQuery);
 
-    if (!roomSnapshot.empty) {
-      throw new Error("Room number already exists!");
+    if (!roomsSnapshot.empty) {
+      return { success: false, message: "Room number already exist." };
     }
 
-    const roomRef = await addDoc(roomsRef, {
+    await addDoc(roomsRef, {
+      createdAt: serverTimestamp(),
+      hotelId: data.hotelId,
+      pricePerNight: data.pricePerNight,
       roomNumber: data.roomNumber,
       roomType: data.roomType,
-      pricePerNight: data.pricePerNight,
       status: data.status,
-      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
 
-    await updateDoc(doc(db, "rooms", roomRef.id), {
-      roomId: roomRef.id,
-    });
-
-    return roomRef.id;
-
+    return { success: true, message: "Room added successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to add room." };
   }
 };
 
@@ -63,38 +51,56 @@ export const getRooms = async (status?: string) => {
     const snapshot = await getDocs(roomQuery);
 
     const rooms = snapshot.docs.map(doc => ({
-      ...doc.data(),
+      roomId: doc.id,
+      ...doc.data()
     }));
 
-    return rooms;
-
+    return { success: true, message: "Rooms fetched successfully.", data: rooms };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to fetch rooms." };
   }
 };
 
-export const updateRoom = async (roomId: string, updatedData: Partial<RoomData>) => {
+export const updateRoom = async (data: RoomData) => {
   try {
-    const roomDoc = doc(db, "rooms", roomId);
+    const duplicateQuery = query(
+      roomsRef,
+      where("roomNumber", "==", data.roomNumber.trim())
+    );
+    
+    const duplicateSnapshot = await getDocs(duplicateQuery);
+    
+    const duplicateExists = duplicateSnapshot.docs.some(doc => doc.id !== data.roomId);
+    if (duplicateExists) {
+      return { success: false, message: "Room number already exists." };
+    }
 
-    await updateDoc(roomDoc, {
-      ...updatedData,
+    const roomRef = doc(roomsRef, data.roomId);
+
+    await updateDoc(roomRef, {
+      hotelId: data.hotelId,
+      pricePerNight: data.pricePerNight,
+      roomNumber: data.roomNumber,
+      roomType: data.roomType,
+      status: data.status,
       updatedAt: serverTimestamp(),
     });
 
+    return { success: true, message: "Room updated successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to update room." };
   }
 };
 
 export const deleteRoom = async (roomId: string) => {
   try {
-    await deleteDoc(doc(db, "rooms", roomId));
+    await deleteDoc(doc(roomsRef, roomId));
 
+    return { success: true, message: "Room delete successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to delete room." };
   }
 };

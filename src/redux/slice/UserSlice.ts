@@ -37,8 +37,8 @@ export const fetchUserDetails = createAsyncThunk<UserDetails, string, { rejectVa
   async (uid: string, { rejectWithValue }) => {
     const result = await getUserDetails(uid);
 
-    if (!result.success) {
-      return rejectWithValue(result.message);
+    if (!result.success || !result.data) {
+      return rejectWithValue(result.message ?? "User not found");
     }
 
     return result.data;

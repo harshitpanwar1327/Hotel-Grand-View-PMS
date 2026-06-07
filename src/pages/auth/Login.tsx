@@ -21,13 +21,16 @@ const Login = () => {
     try {
       setLoading(true);
       const result = await loginUser(data.email, data.password);
-
       if (!result.success) {
         toast.error(result.message);
         return;
       }
 
       const user = result.data;
+      if (!user) {
+        toast.error("User data not found");
+        return;
+      }
 
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("userId", user.uid);
