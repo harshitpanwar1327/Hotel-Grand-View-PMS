@@ -3,7 +3,7 @@ import { getUserDetails } from '../../firebase/services/UserService'
 import { Timestamp } from "firebase/firestore";
 
 export interface UserDetails {
-  createAt: Timestamp | null,
+  createdAt: Timestamp | null,
   email: string,
   hotelIds: string[],
   isActive: boolean,
@@ -20,7 +20,7 @@ interface UserDetailsState {
 
 const initialState: UserDetailsState = {
   items: {
-    createAt: null,
+    createdAt: null,
     email: '',
     hotelIds: [],
     isActive: true,

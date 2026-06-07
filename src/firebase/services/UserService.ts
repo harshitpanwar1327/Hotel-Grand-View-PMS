@@ -16,7 +16,7 @@ export const getUserDetails = async (uid: string) => {
     return {
       success: true,
       data: {
-        createAt: userData.createAt,
+        createdAt: userData.createdAt,
         email: userData.email,
         hotelIds: userData.hotelIds ?? [],
         isActive: userData.isActive,

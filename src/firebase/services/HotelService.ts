@@ -1,14 +1,6 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../Firebase";
-
-export interface HotelData {
-  address: string;
-  createdAt?: Timestamp | null;
-  hotelId?: string;
-  hotelName: string;
-  phone: string;
-  updatedAt?: Timestamp | null;
-}
+import type { HotelData } from "../../redux/slice/HotelSlice";
 
 const hotelsRef = collection(db, "hotels");
 
@@ -75,7 +67,9 @@ export const updateHotel = async (data: HotelData) => {
     const hotelRef = doc(hotelsRef, data.hotelId);
 
     await updateDoc(hotelRef, {
-      ...data,
+      hotelName: data.hotelName.trim(),
+      address: data.address,
+      phone: data.phone,
       updatedAt: serverTimestamp(),
     });
 

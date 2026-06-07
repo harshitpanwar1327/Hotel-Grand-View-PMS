@@ -4,11 +4,15 @@ import './index.css'
 import App from './App.tsx'
 import { HashRouter as Router } from 'react-router-dom'
 import { ToastContainer, Bounce } from 'react-toastify'
+import { Provider } from 'react-redux'
+import { store } from './redux/Store.ts'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Router>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
       <ToastContainer
         position="top-center"
         autoClose={1500}

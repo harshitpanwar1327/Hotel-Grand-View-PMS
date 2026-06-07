@@ -1,55 +1,39 @@
-import { useEffect, useState, useCallback } from "react"
-import { Building2, Pencil } from "lucide-react"
-import { toast } from "react-toastify"
+import { useEffect, useState, lazy } from "react"
+import { Building2, Pencil, Trash2 } from "lucide-react"
 import { ClipLoader } from "react-spinners";
 import Swal from "sweetalert2";
-import { deleteHotel, getHotels, type HotelData } from "../../firebase/services/HotelService"
-import AddHotel from "../../modals/hotels/AddHotel"
+import { deleteHotel } from "../../firebase/services/HotelService"
 import EditHotel from "../../modals/hotels/EditHotel"
+import { fetchHotels, type HotelData } from "../../redux/slice/HotelSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/Store";
+
+const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const Hotels = () => {
-  const [hotels, setHotels] = useState<HotelData[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const { items: hotels, loading } = useSelector((state: RootState) => state.hotel);
 
-  const [openAddModal, setOpenAddModal] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
   
   const [selectedHotel, setSelectedHotel] = useState<HotelData>({
     address: '',
+    hotelId: '',
     hotelName: '',
     phone: ''
   });
 
-  const fetchHotels = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getHotels();
-      if (response.success && response.data) {
-        setHotels(response.data as HotelData[]);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to fetch hotels.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(()=>{
+    dispatch(fetchHotels());
+  }, [dispatch]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchHotels();
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [fetchHotels]);
-
-  const handleEditRoom = async (hotel: HotelData) => {
+  const handleEdit = async (hotel: HotelData) => {
     setSelectedHotel(hotel);
     setOpenEditModal(true);
   }
 
-  const handleDeleteRoom = async (hotelId: string) => {
+  const handleDelete = async (hotelId: string) => {
     try {
       const result = await Swal.fire({
         title: "Delete Hotel?",
@@ -86,7 +70,7 @@ const Hotels = () => {
       });
 
       await deleteHotel(hotelId);
-      fetchHotels();
+      dispatch(fetchHotels());
 
       Swal.fire({
         title: "Deleted!",
@@ -114,68 +98,41 @@ const Hotels = () => {
   };
 
   return (
-    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
-        <div className="flex items-center justify-between gap-6">
-            <div>
-                <h1 className="text-2xl font-bold">Hotels</h1>
-                <p className="text-gray-500 text-sm">Manage your hotels</p>
-            </div>
-            <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddModal(true)}>+ Add Hotel</button>
-        </div>
+    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
+      <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
 
-        <div className="grid gap-6 lg:grid-cols-2">
+      {loading ? (
+        <div className="flex grow items-center justify-center">
+          <ClipLoader color="#1B2A41" size={50} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
           {hotels.map((hotel, index) => (
-            <div key={index} className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
-              <div className="flex justify-between">
-                <div className="flex gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F4F6]">
-                    <Building2 size={20} className="text-[#334155]"/>
+            <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 text-[#1B2A41]">
+                    <Building2 size={20} />
                   </div>
-                  <div>
-                    <h3 className="text-md font-bold">{hotel.hotelName}</h3>
-                  </div>
+                  <h3 className="font-bold truncate">{hotel.hotelName}</h3>
                 </div>
 
-                <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-blue-50 transition duration-300" onClick={()=>handleEditRoom(hotel)}>
-                  <Pencil size={16} className="text-blue-500" />
-                </button>
+                <div className="flex items-center gap-3">
+                  <Pencil size={16} className="text-blue-500 hover:text-blue-700 cursor-pointer transition duration-300" onClick={()=>handleEdit(hotel)} />
+                  <Trash2 size={16} className="text-red-500 hover:text-red-700 cursor-pointer transition duration-300" onClick={()=>handleDelete(hotel.hotelId)} />
+                </div>
               </div>
 
-              <div className="mt-4 space-y-2 text-sm text-[#4B5563]">
-                <p>{hotel.address}</p>
-                <p>{hotel.phone}</p>
+              <div className="flex flex-col gap-2 text-sm text-[#4B5563]">
+                <p><strong>Address: </strong> {hotel.address}</p>
+                <span><strong>Phone: </strong> <a href={`tel:${hotel.phone}`} className="text-blue-700">{hotel.phone}</a></span>
               </div>
             </div>
           ))}
         </div>
+      )}
 
-        {/* <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <Users size={20} className="text-[#4B5563]"/>
-            <h2 className="text-md font-bold">Staff & Hotel Assignment</h2>
-          </div>
-
-          <p className="mt-4 text-md text-[#6B7280]">Assign each receptionist to a hotel. Admins are unassigned and see every hotel.</p>
-          
-          <div className="mt-8 flex items-center justify-between">
-            <div>
-              <h3 className="text-md font-bold">Harshit Panwar</h3>
-              <p className="text-sm text-[#6B7280]">harshitpanwar1327@gmail.com</p>
-            </div>
-
-            <select name="name" id="name" className="p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#1B2A41] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300">
-              <option value="">All hotels (admin)</option>
-              {hotels.map((hotel) => (
-                <option key={hotel.name} value={hotel.name}>
-                  {hotel.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div> */}
-
-        {openAddModal && <AddHotel setOpenModal={setOpenAddModal} fetchHotels={fetchHotels} />}
-        {openEditModal && <EditHotel setOpenModal={setOpenEditModal} fetchHotels={fetchHotels} selectedHotel={selectedHotel} />}
+      {openEditModal && <EditHotel setOpenModal={setOpenEditModal} selectedHotel={selectedHotel} />}
     </div>
   )
 }

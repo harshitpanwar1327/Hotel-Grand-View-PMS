@@ -120,7 +120,6 @@ const Rooms = () => {
       });
 
       await deleteRoom(roomId);
-
       fetchRooms();
 
       Swal.fire({
@@ -134,7 +133,6 @@ const Rooms = () => {
           popup: "rounded-2xl",
         },
       });
-
     } catch (error) {
       console.log(error);
       Swal.fire({
@@ -176,7 +174,7 @@ const Rooms = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
           {rooms.map((room) => (
             <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-gray-500 text-xs font-medium">Room Number</p>
                   <h2 className="text-2xl font-bold">{room.roomNumber}</h2>

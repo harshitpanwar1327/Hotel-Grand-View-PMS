@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import { Hotel, LayoutDashboard, UserPlus, ClipboardList, BedDouble, HotelIcon } from "lucide-react"
+import { LayoutDashboard, UserPlus, ClipboardList, BedDouble, Hotel } from "lucide-react"
 import { Logout, Menu } from "@mui/icons-material"
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Swal from 'sweetalert2'
+import Logo from '../assets/Logo.png'
 
 const Navigation = () => {
   const navClass = ({ isActive }: { isActive: boolean })=>`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#1B2A41] transition duration-300 ${isActive? 'bg-[#1B2A41] text-white' : 'hover:bg-gray-200'}`;
@@ -63,9 +64,7 @@ const Navigation = () => {
     <>
       <div className="h-full hidden lg:flex flex-col w-65 shrink-0 border-r border-gray-200 z-50 bg-[#fbfcfe]">
         <div className='flex items-center gap-3 px-4 py-6 border-b border-gray-200'>
-          <div className="w-10 h-10 rounded-xl bg-[#0f2942] text-white flex items-center justify-center">
-            <Hotel size={20} />
-          </div>
+          <img src={Logo} alt="Logo" className="w-10 h-10 border border-gray-200 rounded-xl" />
           <div>
             <h2 className='font-semibold'>RC Stays & Resorts</h2>
             <p className='text-xs text-gray-500 font-medium'>Reception Console</p>
@@ -91,7 +90,7 @@ const Navigation = () => {
           }
           {role==="Owner" &&
             <NavLink to="/hotels" className={navClass}>
-              <HotelIcon size={18} /> Hotels
+              <Hotel size={18} /> Hotels
             </NavLink>
           }
         </div>
@@ -143,9 +142,7 @@ const Navigation = () => {
               transition={{ duration: 0.3 }}
             >
               <div className='flex items-center gap-3 px-4 py-6 border-b border-gray-200'>
-                <div className="w-10 h-10 rounded-xl bg-[#0f2942] text-white flex items-center justify-center">
-                  <Hotel size={20} />
-                </div>
+                <img src={Logo} alt="Logo" className="w-10 h-10 border border-gray-200 rounded-xl" />
                 <div>
                   <h2 className='font-semibold'>RC Stays & Resorts</h2>
                   <p className='text-xs text-gray-500 font-medium'>Reception Console</p>
@@ -171,7 +168,7 @@ const Navigation = () => {
                 }
                 {role==="Owner" &&
                   <NavLink to="/hotels" className={navClass} onClick={()=>setIsOpen(false)}>
-                    <HotelIcon size={18} /> Hotels
+                    <Hotel size={18} /> Hotels
                   </NavLink>
                 }
               </div>
