@@ -1,15 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getHotels } from '../../firebase/services/HotelService';
-import type { Timestamp } from 'firebase/firestore';
-
-interface HotelFirestore {
-  address: string;
-  createdAt?: Timestamp | null;
-  hotelId: string;
-  hotelName: string;
-  phone: string;
-  updatedAt?: Timestamp | null;
-}
 
 export interface HotelData {
   address: string;
@@ -42,13 +32,7 @@ export const fetchHotels = createAsyncThunk<HotelData[], void, { rejectValue: st
         return rejectWithValue(result.message || "Failed to fetch hotels.");
       }
 
-      const hotels: HotelData[] = (result.data as HotelFirestore[]).map((hotel) => ({
-        ...hotel,
-        createdAt: hotel.createdAt?.toDate().toISOString() ?? null,
-        updatedAt: hotel.updatedAt?.toDate().toISOString() ?? null
-      }));
-
-      return hotels;
+      return result.data as HotelData[];
     } catch (error) {
       console.error(error);
       return rejectWithValue("Failed to fetch hotels.");

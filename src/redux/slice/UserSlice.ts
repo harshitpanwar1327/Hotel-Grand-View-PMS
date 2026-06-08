@@ -1,28 +1,28 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit'
 import { getUserDetails } from '../../firebase/services/UserService'
-import { Timestamp } from "firebase/firestore";
+import type { SelectedHotel } from './SelectedHotelSlice';
 
-export interface UserDetails {
-  createdAt: Timestamp | null,
+export interface UserData {
+  createdAt: string | null,
   email: string,
-  hotelIds: string[],
+  hotels: SelectedHotel[],
   isActive: boolean,
   role: string,
   uid: string,
-  updatedAt: Timestamp | null
+  updatedAt: string | null
 }
 
-interface UserDetailsState {
-  items: UserDetails,
+interface UserDataState {
+  items: UserData,
   loading: boolean,
   error: string | null
 }
 
-const initialState: UserDetailsState = {
+const initialState: UserDataState = {
   items: {
     createdAt: null,
     email: '',
-    hotelIds: [],
+    hotels: [],
     isActive: true,
     role: '',
     uid: '',
@@ -32,9 +32,9 @@ const initialState: UserDetailsState = {
   error: null,
 }
 
-export const fetchUserDetails = createAsyncThunk<UserDetails, string, { rejectValue: string }>(
+export const fetchUserDetails = createAsyncThunk<UserData, string, { rejectValue: string }>(
   "user/fetchUserDetails",
-  async (uid: string, { rejectWithValue }) => {
+  async (uid, { rejectWithValue }) => {
     const result = await getUserDetails(uid);
 
     if (!result.success || !result.data) {
@@ -43,7 +43,7 @@ export const fetchUserDetails = createAsyncThunk<UserDetails, string, { rejectVa
 
     return result.data;
   }
-)
+);
 
 export const userSlice = createSlice({
   name: 'users',
@@ -57,7 +57,7 @@ export const userSlice = createSlice({
         state.error = null;
       })
 
-      .addCase(fetchUserDetails.fulfilled, (state, action: PayloadAction<UserDetails>) => {
+      .addCase(fetchUserDetails.fulfilled, (state, action: PayloadAction<UserData>) => {
         state.loading = false;
         state.items = action.payload;
       })

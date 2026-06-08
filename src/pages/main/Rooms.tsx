@@ -1,11 +1,14 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { deleteRoom, getRooms, updateRoom, type RoomData } from "../../firebase/services/RoomService";
+import { useState, useEffect, useCallback, lazy } from "react";
+import { deleteRoom, getRooms, updateRoom } from "../../firebase/services/RoomService";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import AddRoom from "../../modals/rooms/AddRoom";
 import EditRoom from "../../modals/rooms/EditRoom";
+import type { RoomData } from "../../redux/slice/RoomSlice";
+
+const HotelSelector = lazy(()=>import("../../components/HotelSelector"));
 
 const tabStatus = ["All", "Available", "Occupied", "Maintenance"];
 const roomStatus = ["Available", "Occupied", "Maintenance"];
@@ -20,13 +23,7 @@ const Rooms = () => {
   const [openAddRoomModal, setOpenAddRoomModal] = useState<boolean>(false);
   const [openEditRoomModal, setOpenEditRoomModal] = useState<boolean>(false);
 
-  const [selectedRoom, setSelectedRoom] = useState<RoomData>({
-    roomId: '',
-    roomNumber: '',
-    roomType: '',
-    pricePerNight: 0,
-    status: ''
-  });
+  const [selectedRoom, setSelectedRoom] = useState<RoomData>({});
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -45,7 +42,7 @@ const Rooms = () => {
     try {
       setLoading(true);
       const response = await getRooms(activeTab);
-      setRooms(response as RoomData[]);
+      // setRooms(response as RoomData[]);
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch rooms!");
@@ -64,10 +61,6 @@ const Rooms = () => {
 
   const handleStatusChange = async (roomId: string, newStatus: string) => {
     try {
-      await updateRoom(roomId, {
-        status: newStatus,
-      });
-
       fetchRooms();
 
       toast.success("Room status updated.");
@@ -148,75 +141,79 @@ const Rooms = () => {
   };
 
   return (
-    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-bold">Rooms</h1>
-          <p className="text-gray-500 text-sm">{rooms.length} rooms</p>
+    <div className="w-full flex flex-col">
+      <HotelSelector />
+
+      <div className="flex-1 flex flex-col gap-6 p-4">
+        <div className="flex items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-bold">Rooms</h1>
+            <p className="text-gray-500 text-sm">{rooms.length} rooms</p>
+          </div>
+
+          <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
         </div>
 
-        <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {tabStatus.map((status, index) => (
-          <button key={index} onClick={()=>setActiveTab(status)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${activeTab === status ? "bg-[#1B2A41] text-white border-[#1B2A41]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
-            {status}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="flex grow items-center justify-center">
-          <ClipLoader color="#1B2A41" size={50} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
-          {rooms.map((room) => (
-            <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-gray-500 text-xs font-medium">Room Number</p>
-                  <h2 className="text-2xl font-bold">{room.roomNumber}</h2>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(room.status)}`} />
-                  <span className="text-gray-500 text-sm">{room.status}</span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-gray-500 text-xs font-medium">Room Type</p>
-                <p className="font-medium text-lg">{room.roomType}</p>
-              </div>
-
-              <div>
-                <p className="text-gray-500 text-xs font-medium">Price</p>
-                <p className="font-medium text-lg">₹ {room.pricePerNight.toLocaleString('en-IN')} <span className="text-xs">/day</span></p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <select value={room.status} onChange={(e)=>handleStatusChange(room.roomId, e.target.value)} className="flex-1 rounded-xl border border-gray-200 px-4 py-2 shadow-sm outline-none bg-white">
-                  {roomStatus.map((status, index) => (
-                    <option key={index} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-                <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-blue-50 transition duration-300" onClick={()=>handleEditRoom(room)}>
-                  <Pencil size={16} className="text-blue-500" />
-                </button>
-                <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-red-50 transition duration-300" onClick={()=>handleDeleteRoom(room.roomId)}>
-                  <Trash2 size={16} className="text-red-500" />
-                </button>
-              </div>
-            </div>
+        <div className="flex flex-wrap gap-2">
+          {tabStatus.map((status, index) => (
+            <button key={index} onClick={()=>setActiveTab(status)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${activeTab === status ? "bg-[#1B2A41] text-white border-[#1B2A41]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
+              {status}
+            </button>
           ))}
         </div>
-      )}
 
-      {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} fetchRooms={fetchRooms} />}
-      {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} fetchRooms={fetchRooms} />}
+        {loading ? (
+          <div className="flex grow items-center justify-center">
+            <ClipLoader color="#1B2A41" size={50} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
+            {rooms.map((room) => (
+              <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-gray-500 text-xs font-medium">Room Number</p>
+                    <h2 className="text-2xl font-bold">{room.roomNumber}</h2>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(room.status)}`} />
+                    <span className="text-gray-500 text-sm">{room.status}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 text-xs font-medium">Room Type</p>
+                  <p className="font-medium text-lg">{room.roomType}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 text-xs font-medium">Price</p>
+                  <p className="font-medium text-lg">₹ {room.pricePerNight.toLocaleString('en-IN')} <span className="text-xs">/day</span></p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <select value={room.status} onChange={(e)=>handleStatusChange(room.roomId, e.target.value)} className="flex-1 rounded-xl border border-gray-200 px-4 py-2 shadow-sm outline-none bg-white">
+                    {roomStatus.map((status, index) => (
+                      <option key={index} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-blue-50 transition duration-300" onClick={()=>handleEditRoom(room)}>
+                    <Pencil size={16} className="text-blue-500" />
+                  </button>
+                  <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-red-50 transition duration-300" onClick={()=>handleDeleteRoom(room.roomId)}>
+                    <Trash2 size={16} className="text-red-500" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} fetchRooms={fetchRooms} />}
+        {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} fetchRooms={fetchRooms} />}
+      </div>
     </div>
   )
 }

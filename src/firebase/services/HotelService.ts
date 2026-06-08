@@ -38,10 +38,16 @@ export const getHotels = async () => {
     
     const snapshot = await getDocs(hotelsQuery);
 
-    const hotels = snapshot.docs.map(doc => ({
-      hotelId: doc.id,
-      ...doc.data(),
-    }));
+    const hotels = snapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        hotelId: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate().toISOString() ?? null,
+        updatedAt: data.updatedAt?.toDate().toISOString() ?? null,
+      };
+    });
 
     return { success: true, message: "Hotels fetched successfully.", data: hotels };
   } catch (error) {

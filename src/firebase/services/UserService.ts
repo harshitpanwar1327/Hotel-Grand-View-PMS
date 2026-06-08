@@ -1,4 +1,4 @@
-import type { UserDetails } from "../../redux/slice/UserSlice";
+import type { UserData } from "../../redux/slice/UserSlice";
 import { db } from "../Firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -16,14 +16,14 @@ export const getUserDetails = async (uid: string) => {
     return {
       success: true,
       data: {
-        createdAt: userData.createdAt,
+        createdAt: userData.createdAt?.toDate().toISOString() ?? null,
         email: userData.email,
-        hotelIds: userData.hotelIds ?? [],
+        hotels: userData.hotels ?? [],
         isActive: userData.isActive,
         role: userData.role,
         uid: userData.uid,
-        updatedAt: userData.updatedAt
-      } as UserDetails,
+        updatedAt: userData.updatedAt?.toDate().toISOString() ?? null
+      } as UserData,
     };
   } catch (error) {
     console.log(error);

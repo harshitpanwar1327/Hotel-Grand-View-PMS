@@ -98,7 +98,7 @@ const Hotels = () => {
   };
 
   return (
-    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
+    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-4">
       <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
 
       {loading ? (
