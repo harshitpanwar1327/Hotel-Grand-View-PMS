@@ -103,11 +103,13 @@ const Bookings = () => {
           >Reset</button>
         </div>
 
-        {loading ? (
-          <div className="flex grow items-center justify-center">
-            <ClipLoader color="#1B2A41" size={50} />
-          </div>
-        ) : (
+        <div className="grow relative overflow-auto">
+          {loading && (
+            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
+              <ClipLoader color="#5048E5" />
+            </div>
+          )}
+          
           <div className="grow rounded-2xl border border-gray-200 bg-white shadow-sm overflow-auto">
             <table className="w-full">
               <thead className="bg-gray-100 border-b border-gray-200">
@@ -159,7 +161,7 @@ const Bookings = () => {
               </tbody>
             </table>
           </div>
-        )}
+        </div>
 
         {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} fetchBookings={fetchBookings} />}
         {openInvoiceModal && <Invoice setOpenModal={setOpenInvoiceModal} selectedBooking={selectedBooking} />}

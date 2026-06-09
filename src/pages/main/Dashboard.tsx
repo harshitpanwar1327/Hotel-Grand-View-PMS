@@ -79,11 +79,13 @@ const Dashboard = () => {
           <NavLink to={'/check-in'} className="hidden md:block bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300">+ New Check-in</NavLink>
         </div>
 
-        {loading ? (
-          <div className="flex grow items-center justify-center">
-            <ClipLoader color="#1B2A41" size={50} />
-          </div>
-        ) : (
+        <div className="grow relative overflow-auto">
+          {loading && (
+            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
+              <ClipLoader color="#5048E5" />
+            </div>
+          )}
+
           <div className="flex flex-col gap-6 overflow-y-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {dashboardStats.map((card, index) => (
@@ -184,7 +186,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </>
   )

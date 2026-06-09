@@ -101,11 +101,13 @@ const Hotels = () => {
     <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-4">
       <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
 
-      {loading ? (
-        <div className="flex grow items-center justify-center">
-          <ClipLoader color="#1B2A41" size={50} />
-        </div>
-      ) : (
+      <div className="grow relative overflow-auto">
+        {loading && (
+          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
+            <ClipLoader color="#5048E5" />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
           {hotels.map((hotel, index) => (
             <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
@@ -130,7 +132,7 @@ const Hotels = () => {
             </div>
           ))}
         </div>
-      )}
+      </div>
 
       {openEditModal && <EditHotel setOpenModal={setOpenEditModal} selectedHotel={selectedHotel} />}
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { BedDouble, ShieldCheck, Sparkles } from "lucide-react"
 import { ClipLoader } from "react-spinners"
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -59,48 +60,76 @@ const Login = () => {
   };
 
   return (
-    <div className='w-screen h-screen flex items-center justify-center bg-[#fbfcfe] p-4'>
-      <form className="w-full md:w-2/3 lg:w-1/3 flex flex-col gap-6 border border-gray-200 rounded-xl shadow-lg p-8 md:p-10" onSubmit={handleSubmit(onSubmit)}>
-        <div className='flex items-center gap-3'>
-          <img src={Logo} alt="Logo" className="w-10 h-10 border border-gray-200 rounded-xl" />
+    <div className='w-screen h-screen flex bg-[#fbfcfe]'>
+      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-[#04122a] via-[#1c2c4b] to-[#383c44] text-white p-14 flex-col justify-between">
+        <div className="flex flex-col gap-12">
+          <div className="flex items-center gap-4">
+            <img src={Logo} alt="Logo" className="w-14 h-14 rounded-2xl border border-white/10 p-2"/>
+            <div>
+              <h2 className="text-xl font-semibold">RC Stays & Resorts</h2>
+              <p className="text-sm text-gray-300">Hotel Management System</p>
+            </div>
+          </div>
+          <div className="flex items-center w-fit gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-sm">
+            <Sparkles size={14} className="text-yellow-400" />
+            <span>Hospitality, Reimagined</span>
+          </div>
+          <div className="space-y-8">
+            <h1 className="text-5xl font-bold leading-tight max-w-120">One console for every property in your group.</h1>
+            <p className="text-gray-300 text-lg max-w-125">Reception, rooms, bookings and invoicing — unified across all RC Stays properties with role-based access for staff and management.</p>
+          </div>
+        </div>
+
+        <div className="space-y-12">
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2 px-6 py-2 rounded-2xl bg-white/10">
+              <BedDouble size={18} className="text-[#ddb240]"/>
+              <p>Live room status</p>
+            </div>
+            <div className="flex items-center gap-2 px-6 py-2 rounded-2xl bg-white/10">
+              <ShieldCheck size={18} className="text-[#ddb240]"/>
+              <p>Secure staff access</p>
+            </div>
+          </div>
+          <p className="text-gray-400 text-sm">© 2026 RC Stays & Resorts. All rights reserved.</p>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-6">
+        <form className="w-full flex flex-col gap-10 max-w-120" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <h2 className='font-semibold'>RC Stays & Resorts</h2>
-            <p className='text-xs text-gray-500 font-medium'>Reception Console</p>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold">Sign in</h2>
-          <p className="text-sm text-gray-500 font-medium">Use your staff credentials to continue.</p>
-        </div>
-
-        <div className='flex flex-col gap-4'>
-          <div className="flex flex-col gap-1">
-            <label htmlFor='email' className='w-fit text-xs'>Email</label>
-            <input type='email' id='email' placeholder='Enter email' className='p-2 border border-gray-300 rounded-xl focus:outline-none focus-within:border-black focus-within:ring-1 focus-within:ring-black transition duration-300'
-              {...register("email", {
-                required: "Email is required", 
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
-                  message: "Enter a valid email address"
-                }
-              })}
-            />
-            {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor='password' className='w-fit text-xs'>Password</label>
-            <input type='password' id='password' placeholder="••••••••" className='p-2 border border-gray-300 rounded-xl focus:outline-none focus-within:border-black focus-within:ring-1 focus-within:ring-black transition duration-300' 
-              {...register("password", {
-                required: "Password is required"
-              })}
-            />
-            {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
+            <h2 className="text-2xl font-semibold">Sign in to continue</h2>
+            <p className="text-md text-gray-500 font-medium">Welcome back. Use your staff credentials to access the console.</p>
           </div>
 
-          <button className='w-full p-3 rounded-xl bg-black/90 hover:opacity-90 text-sm text-white font-semibold transition duration-300'>{loading ? <ClipLoader size={18} color="#ffffff" /> : 'Sign In'}</button>
-        </div>
-      </form>
+          <div className='flex flex-col gap-6'>
+            <div className="flex flex-col gap-2">
+              <label htmlFor='email' className='w-fit text-xs'>Email</label>
+              <input type='email' id='email' placeholder='Enter email' className='p-2 border border-gray-300 rounded-xl focus:outline-none focus-within:border-black focus-within:ring-1 focus-within:ring-black transition duration-300'
+                {...register("email", {
+                  required: "Email is required", 
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
+                    message: "Enter a valid email address"
+                  }
+                })}
+              />
+              {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor='password' className='w-fit text-xs'>Password</label>
+              <input type='password' id='password' placeholder="••••••••" className='p-2 border border-gray-300 rounded-xl focus:outline-none focus-within:border-black focus-within:ring-1 focus-within:ring-black transition duration-300' 
+                {...register("password", {
+                  required: "Password is required"
+                })}
+              />
+              {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
+            </div>
+
+            <button className='w-full p-3 rounded-xl bg-black/90 hover:opacity-90 text-sm text-white font-semibold transition duration-300'>{loading ? <ClipLoader size={18} color="#ffffff" /> : 'Sign In'}</button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

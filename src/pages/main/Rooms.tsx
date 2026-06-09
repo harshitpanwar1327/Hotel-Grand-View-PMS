@@ -162,11 +162,13 @@ const Rooms = () => {
           ))}
         </div>
 
-        {loading ? (
-          <div className="flex grow items-center justify-center">
-            <ClipLoader color="#1B2A41" size={50} />
-          </div>
-        ) : (
+        <div className="grow relative overflow-auto">
+          {loading && (
+            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
+              <ClipLoader color="#5048E5" />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
             {rooms.map((room) => (
               <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -209,7 +211,7 @@ const Rooms = () => {
               </div>
             ))}
           </div>
-        )}
+        </div>
 
         {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} fetchRooms={fetchRooms} />}
         {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} fetchRooms={fetchRooms} />}
