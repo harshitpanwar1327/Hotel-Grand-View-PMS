@@ -146,8 +146,12 @@ const Bookings = () => {
           </div>
         </div>
 
-        {openCheckoutModal && <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} />}
-        {openInvoiceModal && <Invoice setOpenModal={setOpenInvoiceModal} selectedBooking={selectedBooking} />}
+        {openCheckoutModal && selectedBooking && (
+          <Checkout setOpenModal={setOpenCheckoutModal} selectedBooking={selectedBooking} />
+        )}
+        {openInvoiceModal && selectedBooking && (
+          <Invoice setOpenModal={setOpenInvoiceModal} selectedBooking={selectedBooking} />
+        )}
       </div>
     </div>
   )

@@ -169,7 +169,9 @@ const Rooms = () => {
           </div>
         </div>
 
-        {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} />}
+        {openEditRoomModal && selectedRoom && (
+          <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} />
+        )}
       </div>
     </div>
   )

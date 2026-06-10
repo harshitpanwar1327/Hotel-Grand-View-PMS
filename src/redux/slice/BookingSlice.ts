@@ -4,7 +4,7 @@ import { getBookings } from '../../firebase/services/BookingService';
 export interface BookingData {
   aadharNumber: string;
   bookingStatus: string;
-  bookingId?: string;
+  bookingId: string;
   checkInAt: string;
   checkOutAt: string;
   createdAt?: string | null;

@@ -1,6 +1,6 @@
 import { collection, getDocs, query, Timestamp, where } from "firebase/firestore";
 import { db } from "../Firebase";
-import type { BookingData } from "./BookingService";
+import type { BookingData } from "../../redux/slice/BookingSlice";
 
 export interface DashboardData {
   totalRooms: number;

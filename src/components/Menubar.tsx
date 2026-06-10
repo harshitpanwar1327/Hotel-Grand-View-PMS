@@ -5,8 +5,6 @@ import AddRoom from "../modals/rooms/AddRoom";
 interface MenubarProps {
   heading: string;
   subheading: string;
-  dashboard?: boolean;
-  bookings?: boolean;
   rooms?: boolean;
   hotels?: boolean;
 }
@@ -14,8 +12,6 @@ interface MenubarProps {
 const Menubar: React.FC<MenubarProps> = ({
   heading,
   subheading,
-  dashboard = false,
-  bookings = false,
   rooms = false,
   hotels = false
 }) => {

@@ -1,11 +1,9 @@
-import { lazy, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getDashboardData, type DashboardData } from "../../firebase/services/DashboardService";
 import { toast } from "react-toastify";
 import { BedDouble, BedSingle, KeyRound } from "lucide-react";
 import { ClipLoader } from "react-spinners";
-
-const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -127,12 +125,9 @@ const Dashboard = () => {
                           <td className="p-4">{data.guestName}</td>
                           <td className="p-4">{data.phone}</td>
                           <td className="p-4">
-                            {data.checkInAt?.toDate().toLocaleTimeString("en-IN", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {data.checkInAt}
                           </td>
-                          <td className="p-4">{data.checkOutAt?.toDate().toLocaleDateString("en-IN")}</td>
+                          <td className="p-4">{data.checkOutAt}</td>
                           <td className={`p-4 font-medium ${data.pendingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>{data.pendingAmount > 0 ? `Due ₹${data.pendingAmount}` : "Paid"}</td>
                         </tr>
                       ))
