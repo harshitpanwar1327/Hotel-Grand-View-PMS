@@ -2,6 +2,12 @@ import { collection, getDocs, query, Timestamp, where } from "firebase/firestore
 import { db } from "../Firebase";
 import type { BookingData } from "../../redux/slice/BookingSlice";
 
+export interface DashboardResponse {
+  success: boolean;
+  message: string;
+  data?: DashboardData;
+}
+
 export interface DashboardData {
   totalRooms: number;
   availableRooms: number;
@@ -13,7 +19,7 @@ export interface DashboardData {
 const bookingsRef = collection(db, "bookings");
 const roomsRef = collection(db, "rooms");
 
-export const getDashboardData = async (): Promise<DashboardData> => {
+export const getDashboardData = async (): Promise<DashboardResponse> => {
   try {
     const roomsSnapshot = await getDocs(roomsRef);
     const totalRooms = roomsSnapshot.size;
@@ -33,7 +39,6 @@ export const getDashboardData = async (): Promise<DashboardData> => {
     const todayStartTimestamp = Timestamp.fromDate(startOfDay);
     const todayEndTimestamp = Timestamp.fromDate(endOfDay);
 
-    // TODAY CHECK-INS
     const checkInQuery = query(bookingsRef,
       where("checkInAt", ">=", todayStartTimestamp),
       where("checkInAt", "<=", todayEndTimestamp)
@@ -43,7 +48,6 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 
     const todayCheckIns: BookingData[] = checkInSnapshot.docs.map((doc) => ({ ...(doc.data() as BookingData) }));
 
-    // TODAY CHECK-OUTS
     const checkOutQuery = query(bookingsRef,
       where("checkOutAt", ">=", todayStartTimestamp),
       where("checkOutAt", "<=", todayEndTimestamp)
@@ -53,7 +57,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 
     const todayCheckOuts: BookingData[] = checkOutSnapshot.docs.map((doc) => ({ ...(doc.data() as BookingData) }));
 
-    return {
+    const data = {
       totalRooms,
       availableRooms,
       occupiedRooms,
@@ -61,8 +65,9 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       todayCheckOuts
     }
 
+    return { success: true, message: 'Dashboard data fetched successfully.', data };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: 'Failed to fetch dashboard data.' };
   }
 }

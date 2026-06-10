@@ -98,7 +98,7 @@ const Bookings = () => {
               <tbody>
                 {bookings.length > 0 ? (
                   bookings.map((booking) => (
-                    <tr key={booking.bookingId} className="border-b border-gray-200 hover:bg-gray-100 transition text-sm">
+                    <tr key={booking.bookingId} className="border-b border-gray-200 text-sm">
                       <td className="px-6 py-3">
                         <h2 className="font-semibold">{booking.guestName}</h2>
                         <p className="text-gray-500">{booking.phone}</p>
@@ -118,14 +118,14 @@ const Bookings = () => {
                         <p className="text-xs">due ₹{booking.pendingAmount?.toLocaleString('en-IN')}</p>
                       </td>
                       <td className="px-6 py-3">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 text-xs text-center">
                           <span className={`flex items-center justify-center px-3 py-1 rounded-full font-medium ${booking.bookingStatus==='Active' ? 'bg-green-600/10 text-green-600' : 'bg-red-600/10 text-red-600'}`}>{booking.bookingStatus || '-'}</span>
                           <span className={`flex items-center justify-center px-3 py-1 rounded-full font-medium ${booking.paymentStatus==='Paid' ? 'bg-green-600/10 text-green-600' : 'bg-[#f7ebc8] text-[#5b4720]'}`}>{booking.paymentStatus || '-'}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         {(booking.bookingStatus==='Checked Out') ? (
-                          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 transition duration-300" onClick={()=>handleInvoice(booking)}>
+                          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 shadow-sm font-semibold bg-white hover:scale-102 hover:bg-[#F1E9D2] transition duration-300" onClick={()=>handleInvoice(booking)}>
                             <FileText className="w-4 h-4 text-gray-500" /> Invoice
                           </button>
                         ) : (

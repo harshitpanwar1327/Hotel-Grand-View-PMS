@@ -4,6 +4,7 @@ import { getDashboardData, type DashboardData } from "../../firebase/services/Da
 import { toast } from "react-toastify";
 import { BedDouble, BedSingle, KeyRound } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+import { formatDateTime } from "../../utils/Helper";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -44,7 +45,9 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const response = await getDashboardData();
-      setDashboardData(response as DashboardData);
+      if (response.success && response.data) {
+        setDashboardData(response.data);
+      }
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch rooms!");
@@ -125,9 +128,11 @@ const Dashboard = () => {
                           <td className="p-4">{data.guestName}</td>
                           <td className="p-4">{data.phone}</td>
                           <td className="p-4">
-                            {data.checkInAt}
+                            {formatDateTime(data.checkInAt)}
                           </td>
-                          <td className="p-4">{data.checkOutAt}</td>
+                          <td className="p-4">
+                            {formatDateTime(data.checkOutAt)}
+                          </td>
                           <td className={`p-4 font-medium ${data.pendingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>{data.pendingAmount > 0 ? `Due ₹${data.pendingAmount}` : "Paid"}</td>
                         </tr>
                       ))

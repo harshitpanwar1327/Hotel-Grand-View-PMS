@@ -90,6 +90,7 @@ export const getBookings = async (filters?: FetchBookingsPayload) => {
         ...data,
         checkInAt: data.checkInAt?.toDate().toISOString(),
         checkOutAt: data.checkOutAt?.toDate().toISOString(),
+        checkedOutAt: data.checkedOutAt?.toDate().toISOString() ?? null,
         createdAt: data.createdAt?.toDate().toISOString() ?? null,
         updatedAt: data.updatedAt?.toDate().toISOString() ?? null,
       }

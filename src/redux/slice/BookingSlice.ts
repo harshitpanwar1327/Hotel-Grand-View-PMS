@@ -7,6 +7,7 @@ export interface BookingData {
   bookingId: string;
   checkInAt: string;
   checkOutAt: string;
+  checkedOutAt?: string | null;
   createdAt?: string | null;
   createdBy: string;
   guestName: string;
