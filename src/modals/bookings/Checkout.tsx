@@ -1,14 +1,17 @@
 import { X } from "lucide-react"
-import { checkOut, type BookingData } from "../../firebase/services/BookingService";
+import { checkOut } from "../../firebase/services/BookingService";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
+import { fetchBookings, type BookingData } from "../../redux/slice/BookingSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/Store";
+import { formatLocalDate } from "../../utils/Helper";
 
 interface CheckoutProps {
   setOpenModal: (open: boolean) => void;
   selectedBooking: BookingData;
-  fetchBookings: () => void;
 }
 
 interface CheckoutData {
@@ -16,7 +19,7 @@ interface CheckoutData {
   paymentMethod: string;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ setOpenModal, selectedBooking, fetchBookings }) => {
+const Checkout: React.FC<CheckoutProps> = ({ setOpenModal, selectedBooking }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutData>({
     defaultValues: {
@@ -25,12 +28,19 @@ const Checkout: React.FC<CheckoutProps> = ({ setOpenModal, selectedBooking, fetc
     }
   });
 
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedHotel = useSelector((state: RootState) => state.selectedHotel.items.selectedHotel);
+
   const onsubmit = async (data: CheckoutData) => {
     try {
       setLoading(true);
-      await checkOut(selectedBooking.bookingId, selectedBooking.roomId, selectedBooking.paidAmount, selectedBooking.pendingAmount, data.collectedAmount, data.paymentMethod);
-      toast.success("Booking updated successfully.");
-      fetchBookings();
+      const response = await checkOut(selectedBooking.bookingId, selectedBooking.roomId, selectedBooking.paidAmount, selectedBooking.pendingAmount, data.collectedAmount, data.paymentMethod);
+      if (response.success) {
+        toast.success(response.message);
+        dispatch(fetchBookings({ date: formatLocalDate(new Date()), hotelId: selectedHotel.hotelId }));
+      } else {
+        toast.error(response.message);
+      }
       setLoading(false);
       setOpenModal(false);
     } catch (error) {
@@ -56,7 +66,7 @@ const Checkout: React.FC<CheckoutProps> = ({ setOpenModal, selectedBooking, fetc
 
           <div className="flex items-center justify-between gap-4">
             <p className="text-gray-500 font-medium">Stay</p>
-            <p className="font-medium">{selectedBooking.checkInAt.toDate().toLocaleDateString()} → {selectedBooking.checkOutAt.toDate().toLocaleDateString()}</p>
+            <p className="font-medium">{formatLocalDate(new Date(selectedBooking.checkInAt))} → {formatLocalDate(new Date(selectedBooking.checkOutAt))}</p>
           </div>
 
           <div className="flex items-center justify-between gap-4">

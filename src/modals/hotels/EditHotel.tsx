@@ -25,9 +25,13 @@ const EditHotel: React.FC<EditHotelProps> = ({ setOpenModal, selectedHotel }) =>
   const onsubmit = async (data: HotelData) => {
     try {
       setLoading(true);
-      await updateHotel(data);
-      dispatch(fetchHotels());
-      toast.success("Hotel updated successfully.");
+      const response = await updateHotel(data);
+      if (response.success) {
+        toast.success(response.message);
+        dispatch(fetchHotels());
+      } else {
+        toast.error(response.message);
+      }
       setLoading(false);
       setOpenModal(false);
     } catch (error) {

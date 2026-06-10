@@ -195,24 +195,64 @@ const Navigation = () => {
               <div className="grow flex flex-col gap-2 px-4 py-6 overflow-y-auto">
                 <p className="text-xs uppercase font-semibold text-gray-500 ml-4 mb-2">Workspace</p>
                 {role==="Owner" &&
-                  <NavLink to="/dashboard" className={navClass} onClick={()=>setIsOpen(false)}>
-                    <LayoutDashboard size={18} /> Dashboard
+                  <NavLink to="/dashboard" className={navClass}>
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#D1A85D]" />
+                        )}
+                        <LayoutDashboard size={18} className={isActive ? "text-[#D1A85D]" : ""} />
+                        Dashboard
+                      </>
+                    )}
                   </NavLink>
                 }
-                <NavLink to="/check-in" className={navClass} onClick={()=>setIsOpen(false)}>
-                  <UserPlus size={18} /> Check In
+                <NavLink to="/check-in" className={navClass}>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#D1A85D]" />
+                      )}
+                      <UserPlus size={18} className={isActive ? "text-[#D1A85D]" : ""} />
+                      Check In
+                    </>
+                  )}
                 </NavLink>
-                <NavLink to="/bookings" className={navClass} onClick={()=>setIsOpen(false)}>
-                  <ClipboardList size={18} /> Bookings
+                <NavLink to="/bookings" className={navClass}>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#D1A85D]" />
+                      )}
+                      <ClipboardList size={18} className={isActive ? "text-[#D1A85D]" : ""} />
+                      Bookings
+                    </>
+                  )}
                 </NavLink>
                 {role==="Owner" &&
-                  <NavLink to="/rooms" className={navClass} onClick={()=>setIsOpen(false)}>
-                    <BedDouble size={18} /> Rooms
+                  <NavLink to="/rooms" className={navClass}>
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#D1A85D]" />
+                        )}
+                        <BedDouble size={18} className={isActive ? "text-[#D1A85D]" : ""} />
+                        Rooms
+                      </>
+                    )}
                   </NavLink>
                 }
                 {role==="Owner" &&
-                  <NavLink to="/hotels" className={navClass} onClick={()=>setIsOpen(false)}>
-                    <Hotel size={18} /> Hotels
+                  <NavLink to="/hotels" className={navClass}>
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#D1A85D]" />
+                        )}
+                        <Hotel size={18} className={isActive ? "text-[#D1A85D]" : ""} />
+                        Hotels
+                      </>
+                    )}
                   </NavLink>
                 }
               </div>

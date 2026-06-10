@@ -57,7 +57,7 @@ export const getRooms = async (status?: string, hotelId?: string) => {
 
       return {
         roomId: doc.id,
-        ...doc.data(),
+        ...data,
         createdAt: data.createdAt?.toDate().toISOString() ?? null,
         updatedAt: data.updatedAt?.toDate().toISOString() ?? null,
       }

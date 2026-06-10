@@ -3,7 +3,6 @@ import { lazy, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { addBooking } from "../../firebase/services/BookingService";
-import { Timestamp } from "firebase/firestore";
 import { formatLocalDate } from "../../utils/Helper";
 import { fetchRooms } from "../../redux/slice/RoomSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,8 +13,7 @@ const Menubar = lazy(()=>import('../../components/Menubar'));
 
 interface CheckInFormData {
   aadharNumber: string;
-  checkInAt: Date;
-  checkOutAt: Date;
+  checkOutAt: string;
   guestName: string;
   hotelId: string;
   numberOfGuests: number;
@@ -30,7 +28,11 @@ const CheckIn = () => {
   const selectedHotel = useSelector((state: RootState) => state.selectedHotel.items.selectedHotel);
   const { items: rooms } = useSelector((state: RootState) => state.room);
 
-  const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<CheckInFormData>({});
+  const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<CheckInFormData>({
+    defaultValues: {
+      roomId: "",
+    }
+  });
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -51,10 +53,13 @@ const CheckIn = () => {
   }, [dispatch, selectedHotel.hotelId]);
 
   useEffect(() => {
-    if (rooms.length > 0 && !selectedRoomId) {
-      setValue("roomId", rooms[0].roomId);
+    if (rooms.length > 0) {
+      setValue("roomId", rooms[0].roomId, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
     }
-  }, [rooms, selectedRoomId, setValue]);
+  }, [rooms, setValue]);
 
   const now = new Date();
   const minCheckout = new Date();
@@ -89,23 +94,24 @@ const CheckIn = () => {
   const onSubmit = async (data: CheckInFormData) => {
     try {
       setLoading(true);
-      const checkInAt = new Date();
-      const checkOutAt = new Date(data.checkOutAt);
-      checkOutAt.setHours(11, 0, 0, 0);
 
       const bookingData = {
         ...data,
         hotelId: selectedHotel.hotelId,
         roomNumber: selectedRoom?.roomNumber,
-        checkInAt: Timestamp.fromDate(checkInAt),
-        checkOutAt: Timestamp.fromDate(checkOutAt),
         totalAmount: stayTotal
       };
-
-      await addBooking(bookingData);
-      dispatch(fetchRooms({ status: 'Available', hotelId: selectedHotel.hotelId }));
-      toast.success("Booking confirmed successfully.");
-      reset();
+      const result = await addBooking(bookingData);
+      if (result.success) {
+        dispatch(fetchRooms({ status: 'Available', hotelId: selectedHotel.hotelId }));
+        reset();
+        if (rooms.length > 0) {
+          setValue("roomId", rooms[0].roomId);
+        }
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong! Please try again later...");

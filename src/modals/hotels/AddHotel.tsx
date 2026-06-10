@@ -22,9 +22,13 @@ const AddHotel: React.FC<AddHotelProps> = ({ setOpenModal }) => {
   const onsubmit = async (data: HotelData) => {
     try {
       setLoading(true);
-      await addHotel(data);
-      dispatch(fetchHotels());
-      toast.success("Hotel added successfully.");
+      const response = await addHotel(data);
+      if (response.success) {
+        toast.success(response.message);
+        dispatch(fetchHotels());
+      } else {
+        toast.error(response.message);
+      }
       setLoading(false);
       setOpenModal(false);
     } catch (error) {

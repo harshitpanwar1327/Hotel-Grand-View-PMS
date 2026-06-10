@@ -22,12 +22,16 @@ const AddRoom: React.FC<AddRoomProps> = ({ setOpenModal }) => {
   const onsubmit = async (data: RoomData) => {
     try {
       setLoading(true);
-      await addRoom({
+      const response = await addRoom({
         ...data,
         hotelId: selectedHotel.hotelId,
       });
-      toast.success("Room added successfully.");
-      dispatch(fetchRooms({ hotelId: selectedHotel.hotelId }));
+      if (response.success) {
+        toast.success(response.message);
+        dispatch(fetchRooms({ hotelId: selectedHotel.hotelId }));
+      } else {
+        toast.error(response.message);
+      }
       setLoading(false);
       setOpenModal(false);
     } catch (error) {

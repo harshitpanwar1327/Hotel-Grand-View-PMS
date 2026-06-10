@@ -1,28 +1,6 @@
-import { addDoc, collection, doc, getDocs, orderBy, query, QueryConstraint, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, orderBy, query, QueryConstraint, runTransaction, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../Firebase";
-
-export interface BookingData {
-  aadharNumber: string;
-  bookingStatus: string;
-  checkInAt: Timestamp;
-  checkOutAt: Timestamp;
-  createdBy: string;
-  guestName: string;
-  hotelId: string;
-  numberOfGuests: number;
-  paidAmount: number;
-  paymentMethod: string;
-  paymentStatus: string;
-  pendingAmount: number;
-  phone: string;
-  roomId: string;
-  totalAmount: number;
-}
-
-export interface FilterOptions {
-  status?: string;
-  date?: string;
-}
+import type { BookingData, FetchBookingsPayload } from "../../redux/slice/BookingSlice";
 
 const bookingsRef = collection(db, "bookings");
 const roomsRef = collection(db, 'rooms');
@@ -35,11 +13,15 @@ export const addBooking = async (data: Partial<BookingData>) => {
 
     const pendingAmount = totalAmount - paidAmount;
 
+    const checkInAt = new Date();
+    const checkOutAt = new Date(data.checkOutAt!);
+    checkOutAt.setHours(11, 0, 0, 0);
+
     await addDoc(bookingsRef, {
       aadharNumber: data.aadharNumber,
       bookingStatus: 'Active',
-      checkInAt: data.checkInAt,
-      checkOutAt: data.checkOutAt,
+      checkInAt: Timestamp.fromDate(checkInAt),
+      checkOutAt: Timestamp.fromDate(checkOutAt),
       createdBy: email,
       guestName: data.guestName,
       hotelId: data.hotelId,
@@ -50,6 +32,7 @@ export const addBooking = async (data: Partial<BookingData>) => {
       pendingAmount,
       phone: data.phone,
       roomId: data.roomId,
+      roomNumber: data.roomNumber,
       totalAmount,
       createdAt: serverTimestamp()
     });
@@ -65,16 +48,16 @@ export const addBooking = async (data: Partial<BookingData>) => {
   }
 }
 
-export const getBookings = async (filters?: FilterOptions) => {
+export const getBookings = async (filters?: FetchBookingsPayload) => {
   try {
-    const constraints: QueryConstraint[] = [
-      orderBy("createdAt", "desc")
-    ];
+    const constraints: QueryConstraint[] = [];
+
+    if (filters?.hotelId) {
+      constraints.push(where("hotelId", "==", filters.hotelId));
+    }
 
     if (filters?.status && filters.status !== "All") {
-      constraints.push(
-        where("bookingStatus", "==", filters.status)
-      );
+      constraints.push(where("bookingStatus", "==", filters.status));
     }
 
     if (filters?.date) {
@@ -93,49 +76,85 @@ export const getBookings = async (filters?: FilterOptions) => {
       );
     }
 
+    constraints.push(orderBy("createdAt", "desc"));
+
     const bookingQuery = query(bookingsRef, ...constraints);
 
     const snapshot = await getDocs(bookingQuery);
 
-    const bookings = snapshot.docs.map((doc) => ({
-      ...(doc.data() as BookingData),
-    }));
+    const bookings = snapshot.docs.map((doc) => {
+      const data = doc.data();
 
-    return bookings;
+      return {
+        bookingId: doc.id,
+        ...data,
+        checkInAt: data.checkInAt?.toDate().toISOString(),
+        checkOutAt: data.checkOutAt?.toDate().toISOString(),
+        createdAt: data.createdAt?.toDate().toISOString() ?? null,
+        updatedAt: data.updatedAt?.toDate().toISOString() ?? null,
+      }
+    });
 
+    return { success: true, message: "Bookings fetched successfully.", data: bookings };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to fetch bookings." };
   }
 };
 
 export const checkOut = async (bookingId: string, roomId: string, previousPaidAmount: number, previousPendingAmount: number, collectedAmount: number, paymentMethod: string) => {
   try {
-    const updatedPaidAmount = previousPaidAmount + collectedAmount;
-    const updatedPendingAmount = previousPendingAmount - collectedAmount;
+    if (!bookingId || !roomId) {
+      return { success: false, message: "Invalid booking or room." };
+    }
 
-    await updateDoc(
-      doc(db, "bookings", bookingId),
-      {
+    if (collectedAmount < 0) {
+      return { success: false, message: "Collected amount cannot be negative." };
+    }
+
+    const bookingRef = doc(bookingsRef, bookingId);
+    const roomRef = doc(roomsRef, roomId);
+
+    await runTransaction(db, async (transaction) => {
+      const bookingSnap = await transaction.get(bookingRef);
+      const roomSnap = await transaction.get(roomRef);
+
+      if (!bookingSnap.exists()) {
+        return { success: false, message: 'Booking not found.' };
+      }
+
+      if (!roomSnap.exists()) {
+        return { success: false, message: 'Room not found.' };
+      }
+
+      const bookingData = bookingSnap.data();
+
+      if (bookingData.bookingStatus === "Checked Out") {
+        return { success: false, message: 'Booking already checked out.' };
+      }
+
+      const updatedPaidAmount = previousPaidAmount + collectedAmount;
+      const updatedPendingAmount = Math.max(0, previousPendingAmount - collectedAmount);
+
+      transaction.update(bookingRef, {
         paidAmount: updatedPaidAmount,
         pendingAmount: updatedPendingAmount,
         paymentMethod,
-        paymentStatus: updatedPendingAmount === 0 ? "Paid" : "Partial",
+        paymentStatus: updatedPendingAmount <= 0 ? "Paid" : "Partial",
         bookingStatus: "Checked Out",
         checkedOutAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-    );
+        updatedAt: serverTimestamp(),
+      });
 
-    await updateDoc(
-      doc(db, "rooms", roomId),
-      {
+      transaction.update(roomRef, {
         status: "Available",
-        updatedAt: serverTimestamp()
-      }
-    );
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    return { success: true, message: "Checkout successful." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to checkout." };
   }
 }
