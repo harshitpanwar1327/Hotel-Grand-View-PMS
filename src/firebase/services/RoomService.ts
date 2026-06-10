@@ -34,26 +34,34 @@ export const addRoom = async (data: RoomData) => {
   }
 };
 
-export const getRooms = async (status?: string) => {
+export const getRooms = async (status?: string, hotelId?: string) => {
   try {
-    const constraints: QueryConstraint[] = [
-      orderBy("roomNumber", "asc")
-    ];
+    const constraints: QueryConstraint[] = [];
+
+    if (hotelId) {
+      constraints.push(where("hotelId", "==", hotelId));
+    }
 
     if (status && status !== "All") {
-      constraints.push(
-        where("status", "==", status)
-      );
+      constraints.push(where("status", "==", status));
     }
+
+    constraints.push(orderBy("roomNumber", "asc"));
 
     const roomQuery = query(roomsRef, ...constraints);
 
     const snapshot = await getDocs(roomQuery);
 
-    const rooms = snapshot.docs.map(doc => ({
-      roomId: doc.id,
-      ...doc.data()
-    }));
+    const rooms = snapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        roomId: doc.id,
+        ...doc.data(),
+        createdAt: data.createdAt?.toDate().toISOString() ?? null,
+        updatedAt: data.updatedAt?.toDate().toISOString() ?? null,
+      }
+    });
 
     return { success: true, message: "Rooms fetched successfully.", data: rooms };
   } catch (error) {
@@ -79,7 +87,6 @@ export const updateRoom = async (data: RoomData) => {
     const roomRef = doc(roomsRef, data.roomId);
 
     await updateDoc(roomRef, {
-      hotelId: data.hotelId,
       pricePerNight: data.pricePerNight,
       roomNumber: data.roomNumber,
       roomType: data.roomType,

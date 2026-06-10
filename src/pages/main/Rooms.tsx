@@ -1,29 +1,28 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect, useCallback, lazy } from "react";
-import { deleteRoom, getRooms, updateRoom } from "../../firebase/services/RoomService";
+import { useState, useEffect, lazy } from "react";
+import { deleteRoom } from "../../firebase/services/RoomService";
 import Swal from "sweetalert2";
-import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
-import AddRoom from "../../modals/rooms/AddRoom";
 import EditRoom from "../../modals/rooms/EditRoom";
-import type { RoomData } from "../../redux/slice/RoomSlice";
+import { fetchRooms, type RoomData } from "../../redux/slice/RoomSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/Store";
 
 const HotelSelector = lazy(()=>import("../../components/HotelSelector"));
+const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const tabStatus = ["All", "Available", "Occupied", "Maintenance"];
-const roomStatus = ["Available", "Occupied", "Maintenance"];
 
 const Rooms = () => {
-  const [rooms, setRooms] = useState<RoomData[]>([]);
+  const [status, setStatus] = useState<string>("All");
 
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const [activeTab, setActiveTab] = useState<string>("All");
-
-  const [openAddRoomModal, setOpenAddRoomModal] = useState<boolean>(false);
   const [openEditRoomModal, setOpenEditRoomModal] = useState<boolean>(false);
 
-  const [selectedRoom, setSelectedRoom] = useState<RoomData>({});
+  const [selectedRoom, setSelectedRoom] = useState<RoomData | null>(null);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedHotel = useSelector((state: RootState) => state.selectedHotel.items.selectedHotel);
+  const { items: rooms, loading } = useSelector((state: RootState) => state.room);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -38,38 +37,11 @@ const Rooms = () => {
     }
   };
 
-  const fetchRooms = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getRooms(activeTab);
-      // setRooms(response as RoomData[]);
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to fetch rooms!");
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab]);
-
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchRooms();
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [fetchRooms]);
-
-  const handleStatusChange = async (roomId: string, newStatus: string) => {
-    try {
-      fetchRooms();
-
-      toast.success("Room status updated.");
-
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to update room!");
+    if (selectedHotel.hotelId) {
+      dispatch(fetchRooms({ status, hotelId: selectedHotel.hotelId }));
     }
-  };
+  }, [dispatch, status, selectedHotel.hotelId]);
 
   const handleEditRoom = async (room: RoomData) => {
     setSelectedRoom(room);
@@ -113,7 +85,7 @@ const Rooms = () => {
       });
 
       await deleteRoom(roomId);
-      fetchRooms();
+      dispatch(fetchRooms({ hotelId: selectedHotel.hotelId }));
 
       Swal.fire({
         title: "Deleted!",
@@ -144,21 +116,12 @@ const Rooms = () => {
     <div className="w-full flex flex-col">
       <HotelSelector />
 
-      <div className="flex-1 flex flex-col gap-6 p-4">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-bold">Rooms</h1>
-            <p className="text-gray-500 text-sm">{rooms.length} rooms</p>
-          </div>
-
-          <button className="bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenAddRoomModal(true)}>+ Add Room</button>
-        </div>
+      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
+        <Menubar heading="Rooms" subheading={`${rooms.length} rooms`} rooms={true} />
 
         <div className="flex flex-wrap gap-2">
-          {tabStatus.map((status, index) => (
-            <button key={index} onClick={()=>setActiveTab(status)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${activeTab === status ? "bg-[#1B2A41] text-white border-[#1B2A41]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
-              {status}
-            </button>
+          {tabStatus.map((tab, index) => (
+            <button key={index} onClick={()=>setStatus(tab)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${status === tab ? "bg-[#0d1e3b] text-white border-[#0d1e3b]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>{tab}</button>
           ))}
         </div>
 
@@ -169,9 +132,9 @@ const Rooms = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-1 overflow-y-auto">
             {rooms.map((room) => (
-              <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <div key={room.roomNumber} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-gray-500 text-xs font-medium">Room Number</p>
@@ -193,14 +156,7 @@ const Rooms = () => {
                   <p className="font-medium text-lg">₹ {room.pricePerNight.toLocaleString('en-IN')} <span className="text-xs">/day</span></p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <select value={room.status} onChange={(e)=>handleStatusChange(room.roomId, e.target.value)} className="flex-1 rounded-xl border border-gray-200 px-4 py-2 shadow-sm outline-none bg-white">
-                    {roomStatus.map((status, index) => (
-                      <option key={index} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
+                <div className="self-end flex flex-wrap items-center gap-3">
                   <button className="w-10 h-10 shrink-0 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm hover:bg-blue-50 transition duration-300" onClick={()=>handleEditRoom(room)}>
                     <Pencil size={16} className="text-blue-500" />
                   </button>
@@ -213,8 +169,7 @@ const Rooms = () => {
           </div>
         </div>
 
-        {openAddRoomModal && <AddRoom setOpenModal={setOpenAddRoomModal} fetchRooms={fetchRooms} />}
-        {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} fetchRooms={fetchRooms} />}
+        {openEditRoomModal && <EditRoom setOpenModal={setOpenEditRoomModal} selectedRoom={selectedRoom} />}
       </div>
     </div>
   )

@@ -15,6 +15,12 @@ const HotelSelector = () => {
     if (uid) dispatch(fetchUserDetails(uid));
   }, [uid, dispatch]);
 
+  useEffect(() => {
+    if (hotels.length > 0 && !selectedHotel.hotelId) {
+      dispatch(setSelectedHotel(hotels[0]));
+    }
+  }, [hotels, selectedHotel.hotelId, dispatch]);
+
   const handleHotelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const hotelId = event.target.value;
     const selectedHotel = hotels.find((hotel) => hotel.hotelId === hotelId);
@@ -24,7 +30,7 @@ const HotelSelector = () => {
   return (
     <div className="flex justify-end p-4 border-b border-gray-200">
       <select name="hotel" id="hotel" value={selectedHotel.hotelId} onChange={handleHotelChange} className="border border-gray-200 p-2 rounded-xl shadow-sm focus:outline-none focus:ring focus:ring-[#D1A85D] focus:border-[#D1A85D]">
-        <option value="">All Hotels</option>
+        <option value="" disabled>Select Hotel</option>
         {hotels.map((hotel) => (
           <option key={hotel.hotelId} value={hotel.hotelId}>{hotel.hotelName}</option>
         ))}

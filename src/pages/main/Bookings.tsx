@@ -9,6 +9,7 @@ import { LogOut, FileText } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 
 const HotelSelector = lazy(()=>import("../../components/HotelSelector"));
+const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const statusFilter = ["All", "Active", "Checked Out"];
 

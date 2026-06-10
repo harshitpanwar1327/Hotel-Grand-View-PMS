@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getDashboardData, type DashboardData } from "../../firebase/services/DashboardService";
 import { toast } from "react-toastify";
 import { BedDouble, BedSingle, KeyRound } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+
+const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -86,7 +88,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="flex flex-col gap-6 overflow-y-auto">
+          <div className="flex flex-col gap-6 pb-1 overflow-y-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {dashboardStats.map((card, index) => (
                 <div key={index} className="flex flex-col gap-3 bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">

@@ -3,26 +3,34 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react"
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { updateRoom, type RoomData } from "../../firebase/services/RoomService";
+import { updateRoom } from "../../firebase/services/RoomService";
+import { fetchRooms, type RoomData } from "../../redux/slice/RoomSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/Store";
 
 interface EditRoomProps {
   setOpenModal: (open: boolean) => void;
   selectedRoom: RoomData;
-  fetchRooms: () => void;
 }
 
-const EditRoom: React.FC<EditRoomProps> = ({ setOpenModal, selectedRoom, fetchRooms }) => {
+const EditRoom: React.FC<EditRoomProps> = ({ setOpenModal, selectedRoom }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { register, handleSubmit, formState: { errors } } = useForm<RoomData>({
     defaultValues: selectedRoom
   });
 
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedHotel = useSelector((state: RootState) => state.selectedHotel.items.selectedHotel);
+
   const onsubmit = async (data: RoomData) => {
     try {
       setLoading(true);
-      await updateRoom(data.roomId, data);
+      await updateRoom({
+        ...data,
+        hotelId: selectedHotel.hotelId,
+      });
       toast.success("Room updated successfully.");
-      fetchRooms();
+      dispatch(fetchRooms({ hotelId: selectedRoom.hotelId }));
       setLoading(false);
       setOpenModal(false);
     } catch (error) {
@@ -40,61 +48,59 @@ const EditRoom: React.FC<EditRoomProps> = ({ setOpenModal, selectedRoom, fetchRo
           <X size={18} className="cursor-pointer text-gray-500 hover:text-black hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="roomNumber" className="text-xs">Room No.<span className="text-red-500">*</span></label>
-            <input type="text" id="roomNumber" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter room number"
-              {...register("roomNumber", { 
-                required: "Room number is required"
-              })} 
-            />
-            {errors.roomNumber && <p className="text-red-500 text-xs">{errors.roomNumber.message}</p>}
-          </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="roomNumber" className="text-xs">Room No.<span className="text-red-500">*</span></label>
+          <input type="text" id="roomNumber" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" placeholder="Enter room number"
+            {...register("roomNumber", { 
+              required: "Room number is required"
+            })} 
+          />
+          {errors.roomNumber && <p className="text-red-500 text-xs">{errors.roomNumber.message}</p>}
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="roomType" className="text-xs">Type <span className="text-red-500">*</span></label>
-            <select id="roomType" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" 
-              {...register("roomType", { 
-                required: "Room type is required"
-              })}
-            >
-              <option value='Standard'>Standard</option>
-              <option value='Deluxe'>Deluxe</option>
-              <option value='Suite'>Suite</option>
-              <option value='Family'>Family</option>
-            </select>
-            {errors.roomType && <p className="text-red-500 text-xs">{errors.roomType.message}</p>}
-          </div>
-        
-          <div className="flex flex-col gap-1">
-            <label htmlFor="pricePerNight" className="text-xs">Price <span className="text-red-500">*</span></label>
-            <input id="pricePerNight" type="number" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter room price"
-              {...register("pricePerNight", {
-                required: "Price is required",
-                valueAsNumber: true
-              })}
-            />
-            {errors.pricePerNight && <p className="text-red-500 text-xs">{errors.pricePerNight.message}</p>}
-          </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="roomType" className="text-xs">Type <span className="text-red-500">*</span></label>
+          <select id="roomType" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" 
+            {...register("roomType", { 
+              required: "Room type is required"
+            })}
+          >
+            <option value='Standard'>Standard</option>
+            <option value='Deluxe'>Deluxe</option>
+            <option value='Suite'>Suite</option>
+            <option value='Family'>Family</option>
+          </select>
+          {errors.roomType && <p className="text-red-500 text-xs">{errors.roomType.message}</p>}
+        </div>
+      
+        <div className="flex flex-col gap-1">
+          <label htmlFor="pricePerNight" className="text-xs">Price <span className="text-red-500">*</span></label>
+          <input id="pricePerNight" type="number" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" placeholder="Enter room price"
+            {...register("pricePerNight", {
+              required: "Price is required",
+              valueAsNumber: true
+            })}
+          />
+          {errors.pricePerNight && <p className="text-red-500 text-xs">{errors.pricePerNight.message}</p>}
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="status" className="text-xs">Status <span className="text-red-500">*</span></label>
-            <select id="status" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" 
-              {...register("status", {
-                required: "Status is required"
-              })}
-            >
-              <option value='Available'>Available</option>
-              <option value='Occupied'>Occupied</option>
-              <option value='Maintenance'>Maintenance</option>
-            </select>
-            {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
-          </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="status" className="text-xs">Status <span className="text-red-500">*</span></label>
+          <select id="status" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" 
+            {...register("status", {
+              required: "Status is required"
+            })}
+          >
+            <option value='Available'>Available</option>
+            <option value='Occupied'>Occupied</option>
+            <option value='Maintenance'>Maintenance</option>
+          </select>
+          {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
         </div>
 
         <div className='flex justify-end gap-3 text-sm'>
           <button type="button" className='border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 hover:shadow-lg transition duration-300' onClick={()=>setOpenModal(false)}>Cancel</button>
-          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300 disabled:cursor-not-allowed!' disabled={loading}>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Edit Room"}</button>
+          <button type="submit" className='bg-[#0d1e3b] shadow-[#0d1e3b]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300 disabled:cursor-not-allowed!' disabled={loading}>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Edit Room"}</button>
         </div>
       </form>
     </div>

@@ -98,7 +98,7 @@ const Hotels = () => {
   };
 
   return (
-    <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-4">
+    <div className="mt-12 lg:mt-0 flex-1 flex flex-col gap-6 p-4">
       <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
 
       <div className="grow relative overflow-auto">
@@ -108,12 +108,12 @@ const Hotels = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-1 overflow-auto">
           {hotels.map((hotel, index) => (
             <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 text-[#1B2A41]">
+                  <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 text-[#0d1e3b]">
                     <Building2 size={20} />
                   </div>
                   <h3 className="font-bold truncate">{hotel.hotelName}</h3>

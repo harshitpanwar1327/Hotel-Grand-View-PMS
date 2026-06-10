@@ -47,7 +47,7 @@ const EditHotel: React.FC<EditHotelProps> = ({ setOpenModal, selectedHotel }) =>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="name" className="w-fit text-xs">Hotel Name<span className="text-red-500">*</span></label>
-          <input type="text" id="name" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter hotel name"
+          <input type="text" id="name" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" placeholder="Enter hotel name"
             {...register("hotelName", { 
               required: "Hotel name is required"
             })} 
@@ -57,7 +57,7 @@ const EditHotel: React.FC<EditHotelProps> = ({ setOpenModal, selectedHotel }) =>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="address" className="w-fit text-xs">Address <span className="text-red-500">*</span></label>
-          <input type="text" id="address" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter address"
+          <input type="text" id="address" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" placeholder="Enter address"
             {...register("address", { 
               required: "Address is required"
             })} 
@@ -67,7 +67,7 @@ const EditHotel: React.FC<EditHotelProps> = ({ setOpenModal, selectedHotel }) =>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="w-fit text-xs">Phone <span className="text-red-500">*</span></label>
-          <input type="text" id="phone" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#1B2A41] transition duration-300" placeholder="Enter phone number"
+          <input type="text" id="phone" className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus-within:border-[#374355] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" placeholder="Enter phone number"
             {...register("phone", { 
               required: "Phone number is required",
               pattern: {
@@ -81,7 +81,7 @@ const EditHotel: React.FC<EditHotelProps> = ({ setOpenModal, selectedHotel }) =>
 
         <div className='flex justify-end gap-3 text-sm'>
           <button type="button" className='border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 hover:shadow-lg transition duration-300' onClick={()=>setOpenModal(false)}>Cancel</button>
-          <button type="submit" className='bg-[#1B2A41] shadow-[#1B2A41]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300 disabled:cursor-not-allowed!' disabled={loading}>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Edit Hotel"}</button>
+          <button type="submit" className='bg-[#0d1e3b] shadow-[#0d1e3b]/40 hover:shadow-lg text-white px-4 py-2 rounded-xl hover:opacity-90 transition duration-300 disabled:cursor-not-allowed!' disabled={loading}>{loading ? <ClipLoader size={18} color="#ffffff" /> : "Edit Hotel"}</button>
         </div>
       </form>
     </div>

@@ -3,12 +3,12 @@ import { db } from "../Firebase";
 
 export interface BookingData {
   aadharNumber: string;
-  bookingId: string;
   bookingStatus: string;
   checkInAt: Timestamp;
   checkOutAt: Timestamp;
   createdBy: string;
   guestName: string;
+  hotelId: string;
   numberOfGuests: number;
   paidAmount: number;
   paymentMethod: string;
@@ -16,7 +16,6 @@ export interface BookingData {
   pendingAmount: number;
   phone: string;
   roomId: string;
-  roomNumber: string;
   totalAmount: number;
 }
 
@@ -26,6 +25,7 @@ export interface FilterOptions {
 }
 
 const bookingsRef = collection(db, "bookings");
+const roomsRef = collection(db, 'rooms');
 const email = sessionStorage.getItem('userEmail');
 
 export const addBooking = async (data: Partial<BookingData>) => {
@@ -35,38 +35,33 @@ export const addBooking = async (data: Partial<BookingData>) => {
 
     const pendingAmount = totalAmount - paidAmount;
 
-    const bookingRef = await addDoc(bookingsRef, {
+    await addDoc(bookingsRef, {
       aadharNumber: data.aadharNumber,
       bookingStatus: 'Active',
       checkInAt: data.checkInAt,
       checkOutAt: data.checkOutAt,
       createdBy: email,
       guestName: data.guestName,
+      hotelId: data.hotelId,
       numberOfGuests: data.numberOfGuests,
       paidAmount,
       paymentMethod: data.paymentMethod,
-      paymentStatus: pendingAmount === 0 ? 'Paid' : 'Partial',
+      paymentStatus: pendingAmount <= 0 ? 'Paid' : 'Partial',
       pendingAmount,
       phone: data.phone,
       roomId: data.roomId,
-      roomNumber: data.roomNumber,
       totalAmount,
       createdAt: serverTimestamp()
     });
 
-    await updateDoc(doc(db, "bookings", bookingRef.id), {
-      bookingId: bookingRef.id,
-    });
-
-    await updateDoc(doc(db, "rooms", data.roomId as string), {
+    await updateDoc(doc(roomsRef, data.roomId), {
       status: "Occupied",
     });
 
-    return bookingRef.id;
-
+    return { success: true, message: "Booking added successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { success: false, message: "Failed to add booking." };
   }
 }
 

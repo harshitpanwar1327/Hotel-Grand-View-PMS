@@ -1,17 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { Timestamp } from 'firebase/firestore';
 import { getRooms } from '../../firebase/services/RoomService';
-
-interface RoomFirestore {
-  createdAt?: Timestamp | null;
-  hotelId: string;
-  pricePerNight: number;
-  roomId: string;
-  roomNumber: string;
-  roomType: string;
-  status: string;
-  updatedAt?: Timestamp | null;
-}
 
 export interface RoomData {
   createdAt?: string | null;
@@ -22,6 +10,11 @@ export interface RoomData {
   roomType: string;
   status: string;
   updatedAt?: string | null;
+}
+
+interface FetchRoomsPayload {
+  status?: string;
+  hotelId?: string;
 }
 
 interface RoomDataState {
@@ -36,26 +29,20 @@ const initialState: RoomDataState = {
   error: null,
 }
 
-export const fetchRooms = createAsyncThunk<RoomData[], void, { rejectValue: string }>(
+export const fetchRooms = createAsyncThunk<RoomData[], FetchRoomsPayload, { rejectValue: string }>(
   "room/fetchRooms",
-  async (_, { rejectWithValue }) => {
+  async ({ status, hotelId }, { rejectWithValue }) => {
     try {
-      const result = await getRooms();
+      const result = await getRooms(status, hotelId);
 
       if (!result.success || !result.data) {
         return rejectWithValue(result.message || "Failed to fetch rooms.");
       }
 
-      const rooms: RoomData[] = (result.data as RoomFirestore[]).map((room) => ({
-        ...room,
-        createdAt: room.createdAt?.toDate().toISOString() ?? null,
-        updatedAt: room.updatedAt?.toDate().toISOString() ?? null
-      }));
-
-      return rooms;
+      return result.data as RoomData[];
     } catch (error) {
       console.error(error);
-      return rejectWithValue("Failed to fetch hotels.");
+      return rejectWithValue("Failed to fetch rooms.");
     }
   }
 );
