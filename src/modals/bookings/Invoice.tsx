@@ -27,11 +27,11 @@ const formatDate = (date: Timestamp | Date) => {
 const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
-  // const checkInDate = selectedBooking.checkInAt;
-  // const checkOutDate = selectedBooking.checkOutAt;
+  const checkInDate = new Date(selectedBooking.checkInAt);
+  const checkOutDate = new Date(selectedBooking.checkOutAt);
 
-  // const totalDays = (checkInDate && checkOutDate)
-  //   ? Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))) : 1;
+  const totalDays = (checkInDate && checkOutDate)
+    ? Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))) : 1;
 
   const generatePDF = async (): Promise<Blob> => {
     if (!invoiceRef.current) {
@@ -135,10 +135,10 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
               <h2 className="uppercase text-sm text-[#6B7280] font-medium">Stay</h2>
               <div>
                 <h3 className="font-semibold">Room #{selectedBooking?.roomNumber}</h3>
-                {/* <p className="text-sm">
-                  {formatDate(selectedBooking?.checkInAt)} →{" "} {formatDate(selectedBooking?.checkOutAt)}
+                <p className="text-sm">
+                  {formatDate(checkInDate)} →{" "} {formatDate(checkOutDate)}
                 </p>
-                <p className="text-sm">{totalDays} days</p> */}
+                <p className="text-sm">{totalDays} days</p>
                 <p className="text-sm">Guests: {selectedBooking?.numberOfGuests}</p>
               </div>
             </div>
@@ -157,8 +157,8 @@ const Invoice: React.FC<InvoiceProps> = ({ setOpenModal, selectedBooking }) => {
               <tbody>
                 <tr className="text-sm">
                   <td className="text-left p-3">Room Charges (Room #{selectedBooking?.roomNumber})</td>
-                  {/* <td className="text-center p-3">{totalDays}</td>
-                  <td className="text-center p-3">₹{Math.floor(selectedBooking?.totalAmount / totalDays).toLocaleString("en-IN")}</td> */}
+                  <td className="text-center p-3">{totalDays}</td>
+                  <td className="text-center p-3">₹{Math.floor(selectedBooking?.totalAmount / totalDays).toLocaleString("en-IN")}</td>
                   <td className="text-right p-3">₹{selectedBooking?.totalAmount?.toLocaleString("en-IN")}</td>
                 </tr>
               </tbody>
