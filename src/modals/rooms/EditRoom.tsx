@@ -46,7 +46,7 @@ const EditRoom: React.FC<EditRoomProps> = ({ setOpenModal, selectedRoom }) => {
 
   return (
     <div className='fixed top-0 left-0 w-screen h-screen flex justify-center items-center p-8 bg-black/70 z-60' onClick={()=>setOpenModal(false)}>
-      <form onSubmit={handleSubmit(onsubmit)} onClick={(e)=>e.stopPropagation()} className="bg-white w-full md:w-2/3 lg:w-1/2 rounded-xl flex flex-col gap-4 p-6">
+      <form onSubmit={handleSubmit(onsubmit)} onClick={(e)=>e.stopPropagation()} className="bg-white w-full md:w-1/2 lg:w-1/3 rounded-xl flex flex-col gap-4 p-6">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">Edit Room</h2>
           <X size={18} className="cursor-pointer text-gray-500 hover:text-black hover:scale-105 transition duration-300" onClick={()=>setOpenModal(false)}/>

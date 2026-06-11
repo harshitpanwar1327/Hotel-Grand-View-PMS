@@ -13,12 +13,6 @@ interface CheckData {
   totalAmount: number;
 }
 
-export interface DashboardResponse {
-  success: boolean;
-  message: string;
-  data?: DashboardData;
-}
-
 export interface DashboardData {
   totalRooms: number;
   availableRooms: number;
@@ -30,7 +24,7 @@ export interface DashboardData {
 const bookingsRef = collection(db, "bookings");
 const roomsRef = collection(db, "rooms");
 
-export const getDashboardData = async (): Promise<DashboardResponse> => {
+export const getDashboardData = async () => {
   try {
     const roomsSnapshot = await getDocs(roomsRef);
     const totalRooms = roomsSnapshot.size;

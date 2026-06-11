@@ -165,7 +165,7 @@ const Navigation = () => {
       </div>
 
       {/* --------------- HAMBURGER --------------- */}
-      <div className='lg:hidden p-2 shadow-lg fixed top-4 left-4 rounded-lg z-50 bg-[#0d1e3b]' onClick={()=>setIsOpen(!isOpen)}>
+      <div className='lg:hidden p-2 shadow-lg fixed top-4 left-4 rounded-lg z-60 bg-[#0d1e3b]' onClick={()=>setIsOpen(!isOpen)}>
         <Menu className="text-white"/>
       </div>
 
@@ -178,7 +178,7 @@ const Navigation = () => {
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
             />
-            <motion.div className="fixed top-0 left-0 h-screen lg:hidden flex flex-col bg-[linear-gradient(135deg,#111B2D,#1B2A41_60%,#263A63)] text-white w-65 shrink-0 z-50"
+            <motion.div className="fixed top-0 left-0 h-screen lg:hidden flex flex-col bg-[linear-gradient(135deg,#111B2D,#1B2A41_60%,#263A63)] text-white w-65 shrink-0 z-60"
               initial={{ x: -300 }}
               animate={{ x: 0 }}
               exit={{ x: -300 }}
@@ -195,7 +195,7 @@ const Navigation = () => {
               <div className="grow flex flex-col gap-2 px-4 py-6 overflow-y-auto">
                 <p className="text-xs uppercase font-semibold text-gray-500 ml-4 mb-2">Workspace</p>
                 {role==="Owner" &&
-                  <NavLink to="/dashboard" className={navClass}>
+                  <NavLink to="/dashboard" className={navClass} onClick={()=>setIsOpen(false)}>
                     {({ isActive }) => (
                       <>
                         {isActive && (
@@ -207,7 +207,7 @@ const Navigation = () => {
                     )}
                   </NavLink>
                 }
-                <NavLink to="/check-in" className={navClass}>
+                <NavLink to="/check-in" className={navClass} onClick={()=>setIsOpen(false)}>
                   {({ isActive }) => (
                     <>
                       {isActive && (
@@ -218,7 +218,7 @@ const Navigation = () => {
                     </>
                   )}
                 </NavLink>
-                <NavLink to="/bookings" className={navClass}>
+                <NavLink to="/bookings" className={navClass} onClick={()=>setIsOpen(false)}>
                   {({ isActive }) => (
                     <>
                       {isActive && (
@@ -230,7 +230,7 @@ const Navigation = () => {
                   )}
                 </NavLink>
                 {role==="Owner" &&
-                  <NavLink to="/rooms" className={navClass}>
+                  <NavLink to="/rooms" className={navClass} onClick={()=>setIsOpen(false)}>
                     {({ isActive }) => (
                       <>
                         {isActive && (
@@ -243,7 +243,7 @@ const Navigation = () => {
                   </NavLink>
                 }
                 {role==="Owner" &&
-                  <NavLink to="/hotels" className={navClass}>
+                  <NavLink to="/hotels" className={navClass} onClick={()=>setIsOpen(false)}>
                     {({ isActive }) => (
                       <>
                         {isActive && (

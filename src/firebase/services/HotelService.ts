@@ -1,7 +1,8 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../Firebase";
 import type { HotelData } from "../../redux/slice/HotelSlice";
 
+const usersRef = collection(db, "users");
 const hotelsRef = collection(db, "hotels");
 
 export const addHotel = async (data: HotelData) => {
@@ -17,11 +18,21 @@ export const addHotel = async (data: HotelData) => {
       return { success: false, message: "Hotel name already exist." };
     }
 
-    await addDoc(hotelsRef, {
+    const hotelDoc = await addDoc(hotelsRef, {
       address: data.address,
       createdAt: serverTimestamp(),
       hotelName: data.hotelName.trim(),
       phone: data.phone,
+      updatedAt: serverTimestamp()
+    });
+
+    const userRef = doc(usersRef, data.uid);
+
+    await updateDoc(userRef, {
+      hotels: arrayUnion({
+        hotelId: hotelDoc.id,
+        hotelName: data.hotelName.trim()
+      }),
       updatedAt: serverTimestamp()
     });
 
@@ -79,6 +90,30 @@ export const updateHotel = async (data: HotelData) => {
       updatedAt: serverTimestamp(),
     });
 
+    const usersSnapshot = await getDocs(usersRef);
+
+    const updatePromises = usersSnapshot.docs.map(async (userDoc) => {
+      const userData = userDoc.data();
+
+      if (!Array.isArray(userData.hotels)) return;
+
+      const hotelExists = userData.hotels.some((hotel) => hotel.hotelId === data.hotelId);
+
+      if (!hotelExists) return;
+
+      const updatedHotels = userData.hotels.map((hotel) =>
+        hotel.hotelId === data.hotelId ? {...hotel, hotelName: data.hotelName.trim()} : hotel
+      );
+
+      await updateDoc(userDoc.ref, {
+        hotels: updatedHotels,
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await Promise.all(updatePromises);
+
+
     return { success: true, message: "Hotel updated successfully." };
   } catch (error) {
     console.log(error);
@@ -88,6 +123,25 @@ export const updateHotel = async (data: HotelData) => {
 
 export const deleteHotel = async (hotelId: string) => {
   try {
+    const usersSnapshot = await getDocs(usersRef);
+
+    const userUpdatePromises = usersSnapshot.docs.map(async (userDoc) => {
+      const userData = userDoc.data();
+
+      if (!Array.isArray(userData.hotels)) return;
+
+      const updatedHotels = userData.hotels.filter((hotel) => hotel.hotelId !== hotelId);
+
+      if (updatedHotels.length === userData.hotels.length) return;
+
+      await updateDoc(userDoc.ref, {
+        hotels: updatedHotels,
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await Promise.all(userUpdatePromises);
+
     const roomsQuery = query(
       collection(db, "rooms"),
       where("hotelId", "==", hotelId)
@@ -95,15 +149,17 @@ export const deleteHotel = async (hotelId: string) => {
 
     const roomsSnapshot = await getDocs(roomsQuery);
 
-    const deletePromises = roomsSnapshot.docs.map((room) => deleteDoc(room.ref));
+    const roomDeletePromises = roomsSnapshot.docs.map((room) =>
+      deleteDoc(room.ref)
+    );
 
-    await Promise.all(deletePromises);
+    await Promise.all(roomDeletePromises);
 
     await deleteDoc(doc(hotelsRef, hotelId));
 
-    return { success: true, message: "Hotel delete successfully." };
+    return { success: true, message: "Hotel deleted successfully." };
   } catch (error) {
     console.log(error);
     return { success: false, message: "Failed to delete hotel." };
   }
-}
+};

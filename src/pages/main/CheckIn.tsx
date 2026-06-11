@@ -124,7 +124,7 @@ const CheckIn = () => {
     <div className="w-full flex flex-col">
       <HotelSelector />
 
-      <div className="flex-1 flex flex-col gap-6 p-6 overflow-auto">
+      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
         <Menubar heading="New Check-In" subheading="Fill guest details and confirm booking." />
 
         <form onSubmit={handleSubmit(onSubmit)} onClick={(e)=>e.stopPropagation()} className="flex flex-col gap-6 p-6 bg-white rounded-2xl border border-gray-200 overflow-y-auto">

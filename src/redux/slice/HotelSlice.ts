@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getHotels } from '../../firebase/services/HotelService';
 
 export interface HotelData {
+  uid?: string;
   address: string;
   createdAt?: string | null;
   hotelId: string;

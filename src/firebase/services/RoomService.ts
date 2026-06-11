@@ -8,13 +8,14 @@ export const addRoom = async (data: RoomData) => {
   try {
     const roomsQuery = query(
       roomsRef,
+      where("hotelId", "==", data.hotelId),
       where("roomNumber", "==", data.roomNumber)
     );
 
     const roomsSnapshot = await getDocs(roomsQuery);
 
     if (!roomsSnapshot.empty) {
-      return { success: false, message: "Room number already exist." };
+      return { success: false, message: "Room number already exists in this hotel." };
     }
 
     await addDoc(roomsRef, {
@@ -74,6 +75,7 @@ export const updateRoom = async (data: RoomData) => {
   try {
     const duplicateQuery = query(
       roomsRef,
+      where("hotelId", "==", data.hotelId),
       where("roomNumber", "==", data.roomNumber.trim())
     );
     
@@ -81,7 +83,7 @@ export const updateRoom = async (data: RoomData) => {
     
     const duplicateExists = duplicateSnapshot.docs.some(doc => doc.id !== data.roomId);
     if (duplicateExists) {
-      return { success: false, message: "Room number already exists." };
+      return { success: false, message: "Room number already exists in this hotel." };
     }
 
     const roomRef = doc(roomsRef, data.roomId);

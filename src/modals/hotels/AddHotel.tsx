@@ -19,10 +19,12 @@ const AddHotel: React.FC<AddHotelProps> = ({ setOpenModal }) => {
 
   const dispatch = useDispatch<AppDispatch>();
 
+  const uid = sessionStorage.getItem('userId');
+
   const onsubmit = async (data: HotelData) => {
     try {
       setLoading(true);
-      const response = await addHotel(data);
+      const response = await addHotel({...data, uid});
       if (response.success) {
         toast.success(response.message);
         dispatch(fetchHotels());
