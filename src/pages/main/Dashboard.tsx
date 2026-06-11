@@ -122,20 +122,21 @@ const Dashboard = () => {
                   </thead>
                   <tbody>
                     {dashboardData.todayCheckIns.length > 0 ? (
-                      dashboardData.todayCheckIns.map((data)=>(
-                        <tr key={data.bookingId} className="border-t border-gray-100 text-sm hover:bg-gray-50 transition duration-300">
-                          <td className="p-4 font-medium">#{data.roomNumber}</td>
-                          <td className="p-4">{data.guestName}</td>
-                          <td className="p-4">{data.phone}</td>
-                          <td className="p-4">
-                            {formatDateTime(data.checkInAt)}
-                          </td>
-                          <td className="p-4">
-                            {formatDateTime(data.checkOutAt)}
-                          </td>
-                          <td className={`p-4 font-medium ${data.pendingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>{data.pendingAmount > 0 ? `Due ₹${data.pendingAmount}` : "Paid"}</td>
-                        </tr>
-                      ))
+                      dashboardData.todayCheckIns.map((data)=>{
+                        const checkInDate = data.checkInAt?.toDate().toISOString();
+                        const checkOutDate = data.checkOutAt?.toDate().toISOString();
+
+                        return (
+                          <tr key={data.bookingId} className="border-t border-gray-100 text-sm hover:bg-gray-50 transition duration-300">
+                            <td className="p-4 font-medium">#{data.roomNumber}</td>
+                            <td className="p-4">{data.guestName}</td>
+                            <td className="p-4">{data.phone}</td>
+                            <td className="p-4">{formatDateTime(checkInDate)}</td>
+                            <td className="p-4">{formatDateTime(checkOutDate)}</td>
+                            <td className={`p-4 font-medium ${data.pendingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>{data.pendingAmount > 0 ? `Due ₹${data.pendingAmount}` : "Paid"}</td>
+                          </tr>
+                        )
+                      })
                     ) : (
                       <tr>
                         <td colSpan={6} className="text-center py-20 text-sm text-gray-500">

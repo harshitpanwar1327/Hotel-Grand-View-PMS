@@ -1,6 +1,17 @@
 import { collection, getDocs, query, Timestamp, where } from "firebase/firestore";
 import { db } from "../Firebase";
-import type { BookingData } from "../../redux/slice/BookingSlice";
+
+interface CheckData {
+  bookingId: string;
+  checkInAt: Timestamp;
+  checkOutAt: Timestamp;
+  guestName: string;
+  paidAmount: number;
+  pendingAmount: number;
+  phone: string;
+  roomNumber: string;
+  totalAmount: number;
+}
 
 export interface DashboardResponse {
   success: boolean;
@@ -12,8 +23,8 @@ export interface DashboardData {
   totalRooms: number;
   availableRooms: number;
   occupiedRooms: number;
-  todayCheckIns: BookingData[];
-  todayCheckOuts: BookingData[];
+  todayCheckIns: CheckData[];
+  todayCheckOuts: CheckData[];
 }
 
 const bookingsRef = collection(db, "bookings");
@@ -46,7 +57,10 @@ export const getDashboardData = async (): Promise<DashboardResponse> => {
 
     const checkInSnapshot = await getDocs(checkInQuery);
 
-    const todayCheckIns: BookingData[] = checkInSnapshot.docs.map((doc) => ({ ...(doc.data() as BookingData) }));
+    const todayCheckIns: CheckData[] = checkInSnapshot.docs.map((doc) => ({
+      bookingId: doc.id,
+      ...(doc.data() as CheckData),
+    }));
 
     const checkOutQuery = query(bookingsRef,
       where("checkOutAt", ">=", todayStartTimestamp),
@@ -55,7 +69,10 @@ export const getDashboardData = async (): Promise<DashboardResponse> => {
 
     const checkOutSnapshot = await getDocs(checkOutQuery);
 
-    const todayCheckOuts: BookingData[] = checkOutSnapshot.docs.map((doc) => ({ ...(doc.data() as BookingData) }));
+    const todayCheckOuts: CheckData[] = checkOutSnapshot.docs.map((doc) => ({
+      bookingId: doc.id,
+      ...(doc.data() as CheckData),
+    }));
 
     const data = {
       totalRooms,
