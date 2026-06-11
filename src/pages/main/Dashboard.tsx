@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { lazy, useCallback, useEffect, useState } from "react";
 import { getDashboardData, type DashboardData } from "../../firebase/services/DashboardService";
 import { toast } from "react-toastify";
 import { BedDouble, BedSingle, KeyRound } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { formatDateTime } from "../../utils/Helper";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../redux/Store";
+
+const HotelSelector = lazy(()=>import("../../components/HotelSelector"));
+const Menubar = lazy(()=>import('../../components/Menubar'));
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -41,10 +45,12 @@ const Dashboard = () => {
     }
   ];
 
+  const selectedHotel = useSelector((state: RootState) => state.selectedHotel.items.selectedHotel);
+
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getDashboardData();
+      const response = await getDashboardData(selectedHotel.hotelId);
       if (response.success && response.data) {
         setDashboardData(response.data);
       }
@@ -54,7 +60,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedHotel]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -65,22 +71,11 @@ const Dashboard = () => {
   }, [fetchDashboardData]);
 
   return (
-    <>
-      <div className="mt-10 lg:mt-0 flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-500 text-sm">
-              {new Date().toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric"
-              })}
-            </p>
-          </div>
+    <div className="w-full flex flex-col">
+      <HotelSelector />
 
-          <NavLink to={'/check-in'} className="hidden md:block bg-[#1B2A41] hover:bg-[#1B2A41]/90 shadow-[#1B2A41]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300">+ New Check-in</NavLink>
-        </div>
+      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
+        <Menubar heading="Dashboard" subheading={new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })} dashboard={true} />
 
         <div className="grow relative overflow-auto">
           {loading && (
@@ -191,7 +186,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

@@ -1,10 +1,11 @@
-import { collection, getDocs, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, query, QueryConstraint, Timestamp, where } from "firebase/firestore";
 import { db } from "../Firebase";
 
 interface CheckData {
   bookingId: string;
   checkInAt: Timestamp;
   checkOutAt: Timestamp;
+  checkedOutAt: Timestamp;
   guestName: string;
   paidAmount: number;
   pendingAmount: number;
@@ -24,27 +25,38 @@ export interface DashboardData {
 const bookingsRef = collection(db, "bookings");
 const roomsRef = collection(db, "rooms");
 
-export const getDashboardData = async () => {
+export const getDashboardData = async (hotelId: string) => {
   try {
-    const roomsSnapshot = await getDocs(roomsRef);
-    const totalRooms = roomsSnapshot.size;
+    const constraints: QueryConstraint[] = [];
+    
+    if (hotelId) {
+      constraints.push(where("hotelId", "==", hotelId));
+    }
+  
+    const totalRoomsSnapshot = await getDocs(query(roomsRef, ...constraints));
+    const totalRooms = totalRoomsSnapshot.size;
 
-    const availableQuery = query(roomsRef, where("status", "==", "Available"));
-    const availableSnapshot = await getDocs(availableQuery);
-    const availableRooms = availableSnapshot.size;
+    const availableRoomsSnapshot = await getDocs(
+      query(roomsRef, ...constraints, where("status", "==", "Available"))
+    );
+    const availableRooms = availableRoomsSnapshot.size;
 
-    const occupiedQuery = query(roomsRef, where("status", "==", "Occupied"));
-    const occupiedSnapshot = await getDocs(occupiedQuery);
-    const occupiedRooms = occupiedSnapshot.size;
+    const occupiedRoomsSnapshot = await getDocs(
+      query(roomsRef, ...constraints, where("status", "==", "Occupied"))
+    );
+    const occupiedRooms = occupiedRoomsSnapshot.size;
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
+
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
+
     const todayStartTimestamp = Timestamp.fromDate(startOfDay);
     const todayEndTimestamp = Timestamp.fromDate(endOfDay);
 
-    const checkInQuery = query(bookingsRef,
+    const checkInQuery = query(
+      bookingsRef, ...constraints,
       where("checkInAt", ">=", todayStartTimestamp),
       where("checkInAt", "<=", todayEndTimestamp)
     );
@@ -56,9 +68,10 @@ export const getDashboardData = async () => {
       ...(doc.data() as CheckData),
     }));
 
-    const checkOutQuery = query(bookingsRef,
-      where("checkOutAt", ">=", todayStartTimestamp),
-      where("checkOutAt", "<=", todayEndTimestamp)
+    const checkOutQuery = query(
+      bookingsRef, ...constraints,
+      where("checkedOutAt", ">=", todayStartTimestamp),
+      where("checkedOutAt", "<=", todayEndTimestamp)
     );
 
     const checkOutSnapshot = await getDocs(checkOutQuery);
@@ -68,7 +81,7 @@ export const getDashboardData = async () => {
       ...(doc.data() as CheckData),
     }));
 
-    const data = {
+    const data: DashboardData = {
       totalRooms,
       availableRooms,
       occupiedRooms,

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import AddHotel from "../modals/hotels/AddHotel";
 import AddRoom from "../modals/rooms/AddRoom";
+import { NavLink } from "react-router-dom";
 
 interface MenubarProps {
   heading: string;
   subheading: string;
+  dashboard?: boolean;
   rooms?: boolean;
   hotels?: boolean;
 }
@@ -12,6 +14,7 @@ interface MenubarProps {
 const Menubar: React.FC<MenubarProps> = ({
   heading,
   subheading,
+  dashboard = false,
   rooms = false,
   hotels = false
 }) => {
@@ -24,6 +27,10 @@ const Menubar: React.FC<MenubarProps> = ({
         <h1 className="text-3xl font-bold">{heading}</h1>
         <p className="text-gray-500 text-sm">{subheading}</p>
       </div>
+
+      {dashboard &&
+        <NavLink to={'/check-in'} className="hidden md:block bg-[#0d1e3b] hover:bg-[#0d1e3b]/90 shadow-[#0d1e3b]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300">+ New Check-in</NavLink>
+      }
 
       {rooms &&
         <button className="bg-[#0d1e3b] hover:bg-[#0d1e3b]/90 shadow-[#0d1e3b]/40 hover:shadow-lg text-white text-sm px-6 py-3 rounded-2xl shadow-sm transition duration-300" onClick={()=>setOpenRoomsModal(true)}>+ Add Room</button>
