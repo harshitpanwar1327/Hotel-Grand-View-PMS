@@ -80,17 +80,17 @@ const Dashboard = () => {
 
   return (
     <div className="w-full flex flex-col">
-      <HotelSelector />
+      <div className={`grow relative ${loading ? 'overflow-hidden' : 'overflow-auto'}`}>
+        {loading && (
+          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-49'>
+            <ClipLoader color="#5048E5" />
+          </div>
+        )}
 
-      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
-        <Menubar heading="Dashboard" subheading={new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })} dashboard={true} />
+        <HotelSelector />
 
-        <div className="grow relative overflow-auto">
-          {loading && (
-            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
-              <ClipLoader color="#5048E5" />
-            </div>
-          )}
+        <div className="flex-1 flex flex-col gap-6 p-6 overflow-auto">
+          <Menubar heading="Dashboard" subheading={new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })} dashboard={true} />
 
           <div className="flex flex-col gap-6 pb-1 overflow-y-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">

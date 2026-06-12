@@ -98,17 +98,17 @@ const Hotels = () => {
   };
 
   return (
-    <div className="mt-12 lg:mt-0 flex-1 flex flex-col gap-6 p-4">
-      <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
-
-      <div className="grow relative overflow-auto">
+    <div className="mt-12 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
+      <div className={`grow relative ${loading ? 'overflow-hidden' : 'overflow-auto'}`}>
         {loading && (
-          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
+          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-49'>
             <ClipLoader color="#5048E5" />
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pb-1 overflow-auto">
+        <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-8 pb-1 overflow-auto">
           {hotels.length > 0 ? (
             hotels.map((hotel, index) => (
               <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">

@@ -114,23 +114,23 @@ const Rooms = () => {
 
   return (
     <div className="w-full flex flex-col">
-      <HotelSelector />
+      <div className={`grow relative ${loading ? 'overflow-hidden' : 'overflow-auto'}`}>
+        {loading && (
+          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-49'>
+            <ClipLoader color="#5048E5" />
+          </div>
+        )}
 
-      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
-        <Menubar heading="Rooms" subheading={`${rooms.length} rooms`} rooms={true} />
+        <HotelSelector />
 
-        <div className="flex flex-wrap gap-2">
-          {tabStatus.map((tab, index) => (
-            <button key={index} onClick={()=>setStatus(tab)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${status === tab ? "bg-[#0d1e3b] text-white border-[#0d1e3b]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>{tab}</button>
-          ))}
-        </div>
+        <div className="flex-1 flex flex-col gap-6 p-6 overflow-auto">
+          <Menubar heading="Rooms" subheading={`${rooms.length} rooms`} rooms={true} />
 
-        <div className="grow relative overflow-auto">
-          {loading && (
-            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
-              <ClipLoader color="#5048E5" />
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {tabStatus.map((tab, index) => (
+              <button key={index} onClick={()=>setStatus(tab)} className={`px-4 py-2 rounded-xl text-sm font-medium shadow-sm border transition duration-300 ${status === tab ? "bg-[#0d1e3b] text-white border-[#0d1e3b]" : "bg-white border-gray-200 hover:bg-gray-50"}`}>{tab}</button>
+            ))}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-1 overflow-y-auto">
             {rooms.length > 0 ? (

@@ -46,40 +46,40 @@ const Bookings = () => {
 
   return (
     <div className="w-full flex flex-col overflow-auto">
-      <HotelSelector />
-
-      <div className="flex-1 flex flex-col gap-6 p-4 overflow-auto">
-        <Menubar heading="Bookings" subheading={selectedHotel.hotelName} />
-
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="statusFilter" className="text-xs font-semibold">Status:</label>
-            <select name="statusFilter" id="statusFilter" className="w-full p-2 border border-gray-200 bg-white rounded-xl focus:outline-none focus-within:border-[#0d1e3b] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" value={status} onChange={(e)=>setStatus(e.target.value)}>
-              {statusFilter.map((status, index) => (
-                <option key={index} value={status}>{status}</option>
-              ))}
-            </select>
+      <div className={`grow relative ${loading ? 'overflow-hidden' : 'overflow-auto'}`}>
+        {loading && (
+          <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-49'>
+            <ClipLoader color="#5048E5" />
           </div>
+        )}
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="dateFilter" className="text-xs font-semibold">Date:</label>
-            <input type="date" name="dateFilter" id="dateFilter" className="w-full p-2 border border-gray-200 bg-white rounded-xl focus:outline-none focus-within:border-[#0d1e3b] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" value={date} onChange={(e)=>setDate(e.target.value)} />
-          </div>
+        <HotelSelector />
 
-          <button type="button" className='self-end border border-gray-200 bg-white px-4 py-2 rounded-xl hover:bg-gray-100 hover:border-[#0d1e3b] transition duration-300'
-            onClick={() => {
-              setStatus("All");
-              setDate(formatLocalDate(new Date()));
-            }}
-          >Reset</button>
-        </div>
+        <div className="flex-1 flex flex-col gap-6 p-6 overflow-auto">
+          <Menubar heading="Bookings" subheading={selectedHotel.hotelName} />
 
-        <div className="grow relative overflow-auto">
-          {loading && (
-            <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-50'>
-              <ClipLoader color="#5048E5" />
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="statusFilter" className="text-xs font-semibold">Status:</label>
+              <select name="statusFilter" id="statusFilter" className="w-full p-2 border border-gray-200 bg-white rounded-xl focus:outline-none focus-within:border-[#0d1e3b] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" value={status} onChange={(e)=>setStatus(e.target.value)}>
+                {statusFilter.map((status, index) => (
+                  <option key={index} value={status}>{status}</option>
+                ))}
+              </select>
             </div>
-          )}
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="dateFilter" className="text-xs font-semibold">Date:</label>
+              <input type="date" name="dateFilter" id="dateFilter" className="w-full p-2 border border-gray-200 bg-white rounded-xl focus:outline-none focus-within:border-[#0d1e3b] focus-within:ring-1 focus-within:ring-[#0d1e3b] transition duration-300" value={date} onChange={(e)=>setDate(e.target.value)} />
+            </div>
+
+            <button type="button" className='self-end border border-gray-200 bg-white px-4 py-2 rounded-xl hover:bg-gray-100 hover:border-[#0d1e3b] transition duration-300'
+              onClick={() => {
+                setStatus("All");
+                setDate(formatLocalDate(new Date()));
+              }}
+            >Reset</button>
+          </div>
           
           <div className="grow rounded-2xl border border-gray-200 bg-white shadow-sm overflow-auto">
             <table className="w-full">
