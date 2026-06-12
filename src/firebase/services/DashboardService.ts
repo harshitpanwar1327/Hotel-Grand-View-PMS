@@ -58,7 +58,8 @@ export const getDashboardData = async (hotelId: string) => {
     const checkInQuery = query(
       bookingsRef, ...constraints,
       where("checkInAt", ">=", todayStartTimestamp),
-      where("checkInAt", "<=", todayEndTimestamp)
+      where("checkInAt", "<=", todayEndTimestamp),
+      where("bookingStatus", "==", "Active")
     );
 
     const checkInSnapshot = await getDocs(checkInQuery);

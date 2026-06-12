@@ -26,22 +26,22 @@ const Dashboard = () => {
       title: "Total Rooms",
       value: dashboardData.totalRooms,
       icon: <KeyRound size={18} />,
-      bg: "bg-gray-100",
-      iconColor: "text-gray-600",
+      bg: "bg-[#F1E9D2]",
+      iconColor: "text-[#0d1e3b]",
     },
     {
       title: "Occupied",
       value: dashboardData.occupiedRooms,
       icon: <BedDouble size={18} />,
       bg: "bg-red-100",
-      iconColor: "text-red-600",
+      iconColor: "text-red-700",
     },
     {
       title: "Available",
       value: dashboardData.availableRooms,
       icon: <BedSingle size={18} />,
       bg: "bg-green-100",
-      iconColor: "text-green-600",
+      iconColor: "text-[#0d1e3b]",
     }
   ];
 
@@ -60,7 +60,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedHotel]);
+  }, [selectedHotel.hotelId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,7 +89,7 @@ const Dashboard = () => {
               {dashboardStats.map((card, index) => (
                 <div key={index} className="flex flex-col gap-3 bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-4">
-                    <p className="text-gray-500 uppercase font-medium text-sm">{card.title}</p>
+                    <p className="text-gray-500 uppercase font-medium text-xs">{card.title}</p>
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.bg} ${card.iconColor}`}>{card.icon}</div>
                   </div>
                   <h2 className="text-3xl font-bold">{card.value.toLocaleString('en-IN')}</h2>
@@ -100,7 +100,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 font-semibold">
                 <h2>Active Check-ins</h2>
-                <div className="bg-gray-100 w-10 h-10 rounded-xl flex items-center justify-center">{dashboardData.todayCheckIns.length}</div>
+                <div className="bg-[#F1E9D2] w-10 h-10 rounded-xl flex items-center justify-center">{dashboardData.todayCheckIns.length}</div>
               </div>
 
               <div className="overflow-x-auto">
@@ -147,7 +147,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 font-semibold">
                 <h2>Today's Check-outs</h2>
-                <div className="bg-gray-100 w-10 h-10 rounded-xl flex items-center justify-center">{dashboardData.todayCheckOuts.length}</div>
+                <div className="bg-[#F1E9D2] w-10 h-10 rounded-xl flex items-center justify-center">{dashboardData.todayCheckOuts.length}</div>
               </div>
 
               <div className="overflow-x-auto">
