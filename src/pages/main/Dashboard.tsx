@@ -1,7 +1,7 @@
 import { lazy, useCallback, useEffect, useState } from "react";
 import { getDashboardData, type DashboardData } from "../../firebase/services/DashboardService";
 import { toast } from "react-toastify";
-import { BedDouble, BedSingle, KeyRound } from "lucide-react";
+import { BedDouble, BedSingle, IndianRupee, KeyRound } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { formatDateTime } from "../../utils/Helper";
 import { useSelector } from "react-redux";
@@ -15,6 +15,7 @@ const Dashboard = () => {
     totalRooms: 0,
     availableRooms: 0,
     occupiedRooms: 0,
+    totalPaidAmount: 0,
     todayCheckIns: [],
     todayCheckOuts: []
   });
@@ -41,6 +42,13 @@ const Dashboard = () => {
       value: dashboardData.availableRooms,
       icon: <BedSingle size={18} />,
       bg: "bg-green-100",
+      iconColor: "text-[#0d1e3b]",
+    },
+    {
+      title: "Today's Collection",
+      value: `₹${dashboardData.totalPaidAmount.toLocaleString("en-IN")}`,
+      icon: <IndianRupee size={18} />,
+      bg: "bg-[#F1E9D2]",
       iconColor: "text-[#0d1e3b]",
     }
   ];

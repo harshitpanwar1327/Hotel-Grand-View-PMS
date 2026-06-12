@@ -18,6 +18,7 @@ export interface DashboardData {
   totalRooms: number;
   availableRooms: number;
   occupiedRooms: number;
+  totalPaidAmount: number;
   todayCheckIns: CheckData[];
   todayCheckOuts: CheckData[];
 }
@@ -82,10 +83,16 @@ export const getDashboardData = async (hotelId: string) => {
       ...(doc.data() as CheckData),
     }));
 
+    const totalPaidAmount =
+      [...todayCheckIns, ...todayCheckOuts].reduce(
+        (sum, booking) => sum + (booking.paidAmount || 0), 0
+      );
+
     const data: DashboardData = {
       totalRooms,
       availableRooms,
       occupiedRooms,
+      totalPaidAmount,
       todayCheckIns,
       todayCheckOuts
     }
