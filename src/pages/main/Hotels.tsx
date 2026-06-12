@@ -99,42 +99,44 @@ const Hotels = () => {
 
   return (
     <div className="mt-12 lg:mt-0 flex-1 flex flex-col gap-6 p-6">
-      <div className={`grow relative ${loading ? 'overflow-hidden' : 'overflow-auto'}`}>
+      <div className="relative flex-1 overflow-hidden">
         {loading && (
           <div className='absolute inset-0 flex justify-center items-center backdrop-blur-xs z-49'>
             <ClipLoader color="#5048E5" />
           </div>
         )}
 
-        <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
+        <div className={`h-full overflow-y-auto ${loading ? "pointer-events-none" : ""}`}>
+          <Menubar heading="Hotels" subheading="Manage your hotels" hotels={true} />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-8 pb-1 overflow-auto">
-          {hotels.length > 0 ? (
-            hotels.map((hotel, index) => (
-              <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 text-[#0d1e3b]">
-                      <Building2 size={20} />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-8 pb-1 overflow-auto">
+            {hotels.length > 0 ? (
+              hotels.map((hotel, index) => (
+                <div key={index} className="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 text-[#0d1e3b]">
+                        <Building2 size={20} />
+                      </div>
+                      <h3 className="font-bold truncate">{hotel.hotelName}</h3>
                     </div>
-                    <h3 className="font-bold truncate">{hotel.hotelName}</h3>
+
+                    <div className="flex items-center gap-3">
+                      <Pencil size={16} className="text-blue-500 hover:text-blue-700 cursor-pointer transition duration-300" onClick={()=>handleEdit(hotel)} />
+                      <Trash2 size={16} className="text-red-500 hover:text-red-700 cursor-pointer transition duration-300" onClick={()=>handleDelete(hotel.hotelId)} />
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Pencil size={16} className="text-blue-500 hover:text-blue-700 cursor-pointer transition duration-300" onClick={()=>handleEdit(hotel)} />
-                    <Trash2 size={16} className="text-red-500 hover:text-red-700 cursor-pointer transition duration-300" onClick={()=>handleDelete(hotel.hotelId)} />
+                  <div className="flex flex-col gap-2 text-sm text-[#4B5563]">
+                    <p><strong>Address: </strong> {hotel.address}</p>
+                    <span><strong>Phone: </strong> <a href={`tel:${hotel.phone}`} className="text-blue-700">{hotel.phone}</a></span>
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-2 text-sm text-[#4B5563]">
-                  <p><strong>Address: </strong> {hotel.address}</p>
-                  <span><strong>Phone: </strong> <a href={`tel:${hotel.phone}`} className="text-blue-700">{hotel.phone}</a></span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="bg-white border border-gray-200 rounded-2xl md:col-span-2 lg:col-span-3 p-16 text-center">No hotels yet.</div>
-          )}
+              ))
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-2xl md:col-span-2 lg:col-span-3 p-16 text-center">No hotels yet.</div>
+            )}
+          </div>
         </div>
       </div>
 
