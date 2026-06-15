@@ -66,8 +66,8 @@ export const getDashboardData = async (hotelId: string) => {
     const checkInSnapshot = await getDocs(checkInQuery);
 
     const todayCheckIns: CheckData[] = checkInSnapshot.docs.map((doc) => ({
-      bookingId: doc.id,
       ...(doc.data() as CheckData),
+      bookingId: doc.id
     }));
 
     const checkOutQuery = query(
@@ -79,8 +79,8 @@ export const getDashboardData = async (hotelId: string) => {
     const checkOutSnapshot = await getDocs(checkOutQuery);
 
     const todayCheckOuts: CheckData[] = checkOutSnapshot.docs.map((doc) => ({
-      bookingId: doc.id,
       ...(doc.data() as CheckData),
+      bookingId: doc.id
     }));
 
     const totalPaidAmount =

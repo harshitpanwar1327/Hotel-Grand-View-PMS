@@ -22,6 +22,11 @@ const AddHotel: React.FC<AddHotelProps> = ({ setOpenModal }) => {
   const uid = sessionStorage.getItem('userId');
 
   const onsubmit = async (data: HotelData) => {
+    if (!uid) {
+      toast.error("User not found. Please login again.");
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await addHotel({...data, uid});
