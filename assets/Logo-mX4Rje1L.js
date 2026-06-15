@@ -1,0 +1,1 @@
+var e=`/Hotel-Management-System/assets/Logo-6YykTUxD.png`;export{e as t};
